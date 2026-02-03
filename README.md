@@ -1,181 +1,215 @@
-Try out the dev version: [**Pypi (`3.0rc0`)**](https://pypi.org/project/fast-flights/3.0rc0/)
-
-<br /><br /><br />
 <div align="center">
 
-# ✈️ fast-flights
+# ✈️ flights_OpenClaw
 
-The fast and strongly-typed Google Flights scraper (API) implemented in Python. Based on Base64-encoded Protobuf string.
+A fast, AI-agent-ready Google Flights scraper for Python.
 
-[**Documentation**](https://aweirddev.github.io/flights) • [Issues](https://github.com/AWeirdDev/flights/issues) • [PyPi](https://pypi.org/project/fast-flights)
+[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-```haskell
-$ pip install fast-flights
+[**Quick Start**](#quick-start) • [**AI Agent API**](#ai-agent-integration) • [**Docs**](docs/) • [**Roadmap**](#roadmap)
+
+```bash
+pip install fast-flights
 ```
 
 </div>
 
-## Basics
-**TL;DR**: To use `fast-flights`, you'll first create a filter (for `?tfs=`) to perform a request.
-Then, add `flight_data`, `trip`, `seat`, `passengers` to use the API directly.
+---
+
+## What is this?
+
+This is a fork of [AWeirdDev/flights](https://github.com/AWeirdDev/flights) — a brilliant Google Flights scraper that uses Base64-encoded Protobuf to query flight data. Huge thanks to [@AWeirdDev](https://github.com/AWeirdDev) for the original work and clever reverse-engineering! 🙏
+
+**This fork adds:**
+- 🤖 AI agent-friendly API with structured JSON responses
+- 📦 Pydantic models for validation & serialization  
+- 🔧 MCP (Model Context Protocol) server support
+- 🛡️ Structured error handling with recovery suggestions
+- 📚 Comprehensive documentation
+
+---
+
+## Quick Start
+
+### Basic Usage
 
 ```python
-from fast_flights import FlightData, Passengers, Result, get_flights
+from fast_flights import get_flights, FlightData, Passengers
 
-result: Result = get_flights(
+result = get_flights(
     flight_data=[
-        FlightData(date="2025-01-01", from_airport="TPE", to_airport="MYJ")
+        FlightData(date="2025-06-15", from_airport="JFK", to_airport="LAX")
     ],
     trip="one-way",
     seat="economy",
-    passengers=Passengers(adults=2, children=1, infants_in_seat=0, infants_on_lap=0),
-    fetch_mode="fallback",
+    passengers=Passengers(adults=2),
+    fetch_mode="fallback",  # Recommended for reliability
 )
 
-print(result)
-
-# The price is currently... low/typical/high
-print("The price is currently", result.current_price)
+print(f"Price level: {result.current_price}")  # low, typical, or high
+for flight in result.flights:
+    print(f"{flight.name}: {flight.price} - {flight.duration}")
 ```
 
-**Properties & usage for `Result`**:
+### Round-trip Example
 
 ```python
-result.current_price
-
-# Get the first flight
-flight = result.flights[0]
-
-flight.is_best
-flight.name
-flight.departure
-flight.arrival
-flight.arrival_time_ahead
-flight.duration
-flight.stops
-flight.delay?  # may not be present
-flight.price
+result = get_flights(
+    flight_data=[
+        FlightData(date="2025-06-15", from_airport="SFO", to_airport="LHR"),
+        FlightData(date="2025-06-22", from_airport="LHR", to_airport="SFO"),
+    ],
+    trip="round-trip",
+    seat="business",
+    adults=1,
+)
 ```
 
-**Useless enums**: Additionally, you can use the `Airport` enum to search for airports in code (as you type)! See `_generated_enum.py` in source.
+---
+
+## AI Agent Integration
+
+Built for seamless integration with AI agents like OpenClaw, Claude, and custom LLM applications.
+
+### Install with Agent Support
+
+```bash
+pip install fast-flights[agent]
+```
+
+### Simple Agent API
 
 ```python
-Airport.TAIPEI
-              ╭─────────────────────────────────╮
-              │ TAIPEI_SONGSHAN_AIRPORT         │
-              │ TAPACHULA_INTERNATIONAL_AIRPORT │
-              │ TAMPA_INTERNATIONAL_AIRPORT     │
-              ╰─────────────────────────────────╯
+from fast_flights import search_flights
+
+# Dict input - perfect for LLM function calling
+result = search_flights({
+    "origin": "JFK",
+    "destination": "LAX",
+    "departure_date": "2025-06-15",
+    "adults": 2,
+    "seat_class": "economy"
+})
+
+# Structured response for agents
+response = result.to_agent_response()
+print(response["status"])  # "success" or "error"
+print(response["data"]["best_flight"])
+
+# Human-readable summary
+print(result.summary())
+# "Found 12 flight option(s). Price level: low. Best option: Delta at $249..."
 ```
 
-## What's new
-- `v2.0` – New (much more succinct) API, fallback support for Playwright serverless functions, and [documentation](https://aweirddev.github.io/flights)!
-- `v2.2` - Now supports **local playwright** for sending requests.
+### Features for AI Agents
 
-## Cookies & consent
-The EU region is a bit tricky to solve for now, but the fallback support should be able to handle it.
+| Feature | Description |
+|---------|-------------|
+| **Structured Responses** | JSON-serializable Pydantic models |
+| **Never Throws** | Errors captured in response, not exceptions |
+| **Error Codes** | Machine-readable codes like `RATE_LIMITED`, `NO_FLIGHTS_FOUND` |
+| **Recovery Hints** | Suggested actions for each error type |
+| **Validation** | Input validation with clear error messages |
+
+---
+
+## Fetch Modes
+
+| Mode | Speed | Reliability | Notes |
+|------|-------|-------------|-------|
+| `common` | ⚡ Fast | Medium | Direct HTTP, may be blocked |
+| `fallback` | ⚡ Fast | High | **Recommended** - falls back to Playwright |
+| `force-fallback` | 🐢 Slow | High | Always uses Playwright |
+| `local` | 🐢 Slow | High | Requires local Playwright install |
+| `bright-data` | ⚡ Fast | Very High | Requires API key |
+
+---
+
+## Installation Options
+
+```bash
+# Core only
+pip install fast-flights
+
+# With AI agent support (Pydantic models)
+pip install fast-flights[agent]
+
+# With MCP server support
+pip install fast-flights[mcp]
+
+# With local Playwright
+pip install fast-flights[local]
+
+# Everything
+pip install fast-flights[all]
+```
+
+---
+
+## Roadmap
+
+### ✅ Phase 1: Core API Improvements (Complete)
+- [x] Pydantic models for schema validation
+- [x] Unified `search_flights()` function for agents
+- [x] Structured error handling with recovery suggestions
+- [x] Comprehensive docstrings and type hints
+
+### 🚧 Phase 2: MCP Server (In Progress)
+- [ ] MCP server implementation (`fast_flights.mcp_server`)
+- [ ] Tool definitions for flight search, airport lookup, date comparison
+- [ ] Configuration file for Claude Desktop / OpenClaw
+
+### 📋 Phase 3: Reliability
+- [ ] Retry logic with exponential backoff
+- [ ] Rate limiting protection
+- [ ] Centralized configuration management
+
+### 📋 Phase 4: Async Support
+- [ ] Async wrapper functions
+- [ ] Concurrent multi-route searches
+- [ ] Thread pool optimization
+
+### 💡 Future Ideas
+- Price tracking & alerts
+- Flexible date search (+/- days)
+- Airline filtering
+- HTTP API wrapper (FastAPI)
+
+---
+
+## Documentation
+
+- [AI Agent Integration Guide](docs/AI_AGENT_INTEGRATION.md)
+- [Filters & Options](docs/filters.md)
+- [Fallback Modes](docs/fallbacks.md)
+- [Airport Codes](docs/airports.md)
+- [Local Playwright Setup](docs/local.md)
+
+---
+
+## Credits
+
+This project is a fork of [**fast-flights**](https://github.com/AWeirdDev/flights) by [@AWeirdDev](https://github.com/AWeirdDev).
+
+The original library brilliantly reverse-engineered Google Flights' Protobuf-based query system. Check out the [original README](https://github.com/AWeirdDev/flights) for the fascinating story of how it was built!
+
+---
 
 ## Contributing
-Contributing is welcomed! I probably won't work on this project unless there's a need for a major update, but boy howdy do I love pull requests.
 
-***
+Contributions welcome! Whether it's bug fixes, new features, or documentation improvements — PRs are appreciated.
 
-## How it's made
+---
 
-The other day, I was making a chat-interface-based trip recommendation app and wanted to add a feature that can search for flights available for booking. My personal choice is definitely [Google Flights](https://flights.google.com) since Google always has the best and most organized data on the web. Therefore, I searched for APIs on Google.
+## License
 
-> 🔎 **Search** <br />
-> google flights api
-
-The results? Bad. It seems like they discontinued this service and it now lives in the Graveyard of Google.
-
-> <sup><a href="https://duffel.com/blog/google-flights-api" target="_blank">🧏‍♂️ <b>duffel.com</b></a></sup><br />
-> <sup><i>Google Flights API: How did it work & what happened to it?</i></b>
->
-> The Google Flights API offered developers access to aggregated airline data, including flight times, availability, and prices. Over a decade ago, Google announced the acquisition of ITA Software Inc. which it used to develop its API. **However, in 2018, Google ended access to the public-facing API and now only offers access through the QPX enterprise product**.
-
-That's awful! I've also looked for free alternatives but their rate limits and pricing are just 😬 (not a good fit/deal for everyone).
-
-<br />
-
-However, Google Flights has their UI – [flights.google.com](https://flights.google.com). So, maybe I could just use Developer Tools to log the requests made and just replicate all of that? Undoubtedly not! Their requests are just full of numbers and unreadable text, so that's not the solution.
-
-Perhaps, we could scrape it? I mean, Google allowed many companies like [Serpapi](https://google.com/search?q=serpapi) to scrape their web just pretending like nothing happened... So let's scrape our own.
-
-> 🔎 **Search** <br />
-> google flights ~~api~~ scraper pypi
-
-Excluding the ones that are not active, I came across [hugoglvs/google-flights-scraper](https://pypi.org/project/google-flights-scraper) on Pypi. I thought to myself: "aint no way this is the solution!"
-
-I checked hugoglvs's code on [GitHub](https://github.com/hugoglvs/google-flights-scraper), and I immediately detected "playwright," my worst enemy. One word can describe it well: slow. Two words? Extremely slow. What's more, it doesn't even run on the **🗻 Edge** because of configuration errors, missing libraries... etc. I could just reverse [try.playwright.tech](https://try.playwright.tech) and use a better environment, but that's just too risky if they added Cloudflare as an additional security barrier 😳.
-
-Life tells me to never give up. Let's just take a look at their URL params...
-
-```markdown
-https://www.google.com/travel/flights/search?tfs=CBwQAhoeEgoyMDI0LTA1LTI4agcIARIDVFBFcgcIARIDTVlKGh4SCjIwMjQtMDUtMzBqBwgBEgNNWUpyBwgBEgNUUEVAAUgBcAGCAQsI____________AZgBAQ&hl=en
-```
-
-| Param | Content | My past understanding |
-|-------|---------|-----------------------|
-| hl    | en      | Sets the language.    |
-| tfs   | CBwQAhoeEgoyMDI0LTA1LTI4agcIARID… | What is this???? 🤮🤮 |
-
-I removed the `?tfs=` parameter and found out that this is the control of our request! And it looks so base64-y.
-
-If we decode it to raw text, we can still see the dates, but we're not quite there — there's too much unwanted Unicode text.
-
-Or maybe it's some kind of a **data-storing method** Google uses? What if it's something like JSON? Let's look it up.
-
-> 🔎 **Search** <br />
-> google's json alternative
-
-> 🐣 **Result**<br />
-> Solution: The Power of **Protocol Buffers**
-> 
-> LinkedIn turned to Protocol Buffers, often referred to as **protobuf**, a binary serialization format developed by Google. The key advantage of Protocol Buffers is its efficiency, compactness, and speed, making it significantly faster than JSON for serialization and deserialization.
-
-Gotcha, Protobuf! Let's feed it to an online decoder and see how it does:
-
-> 🔎 **Search** <br />
-> protobuf decoder
-
-> 🐣 **Result**<br />
-> [protobuf-decoder.netlify.app](https://protobuf-decoder.netlify.app)
-
-I then pasted the Base64-encoded string to the decoder and no way! It DID return valid data!
-
-![annotated, Protobuf Decoder screenshot](https://github.com/AWeirdDev/flights/assets/90096971/77dfb097-f961-4494-be88-3640763dbc8c)
-
-I immediately recognized the values — that's my data, that's my query!
-
-So, I wrote some simple Protobuf code to decode the data.
-
-```protobuf
-syntax = "proto3"
-
-message Airport {
-    string name = 2;
-}
-
-message FlightInfo {
-    string date = 2;
-    Airport dep_airport = 13;
-    Airport arr_airport = 14;
-}
-
-message GoogleSucks {
-    repeated FlightInfo = 3;
-}
-```
-
-It works! Now, I won't consider myself an "experienced Protobuf developer" but rather a complete beginner.
-
-I have no idea what I wrote but... it worked! And here it is, `fast-flights`.
-
-***
+MIT License — see [LICENSE](LICENSE) for details.
 
 <div align="center">
 
-(c) 2024-2025 AWeirdDev, and other awesome people
+---
+
+Made with ☕ by [laikhtman](https://github.com/laikhtman) • Original by [AWeirdDev](https://github.com/AWeirdDev)
 
 </div>
