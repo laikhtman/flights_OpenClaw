@@ -314,17 +314,23 @@ pip install fast-flights[all]
   - [x] `get_calendar_heatmap` - Monthly price heatmap
   - [x] `suggest_best_dates` - Smart date suggestions
 
-### ✈️ Phase 7: Airline Filtering
-- [ ] **Airline preferences**
-  - [ ] Include/exclude specific airlines
-  - [ ] Alliance filtering (Star Alliance, OneWorld, SkyTeam)
-  - [ ] Codeshare handling options
-- [ ] **Aircraft preferences**
-  - [ ] Filter by aircraft type (wide-body only, etc.)
-  - [ ] Avoid specific aircraft models
-- [ ] **Loyalty program integration**
-  - [ ] Preferred airline prioritization
-  - [ ] Miles earning potential display
+### ✈️ Phase 7: Airline Filtering ✅
+- [x] **Airline preferences**
+  - [x] Include/exclude specific airlines
+  - [x] Alliance filtering (Star Alliance, OneWorld, SkyTeam)
+  - [x] Low-cost carrier options
+- [x] **Aircraft preferences**
+  - [x] Filter by aircraft type (wide-body only, etc.)
+  - [x] Exclude regional jets/turboprops
+- [x] **Loyalty program integration**
+  - [x] Preferred airline prioritization
+  - [x] Frequent flyer program database
+- [x] **MCP tools**
+  - [x] `search_airlines` - Find airline info
+  - [x] `get_alliance_airlines` - List alliance members
+  - [x] `filter_flights_by_airline` - Apply airline filters
+  - [x] `get_low_cost_carriers` - List budget airlines
+  - [x] `get_airline_info` - Get airline details
 
 ### 🌐 Phase 8: HTTP API (FastAPI)
 - [ ] **REST API endpoints**

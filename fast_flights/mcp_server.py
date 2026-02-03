@@ -69,6 +69,23 @@ try:
 except ImportError:
     FLEX_DATES_AVAILABLE = False
 
+# Import airline filtering
+try:
+    from .airline_filter import (
+        get_airline_info,
+        get_airline_alliance,
+        get_airlines_by_alliance,
+        search_airlines,
+        apply_airline_filters,
+        get_low_cost_carriers,
+        Alliance,
+        AircraftCategory,
+        AIRLINES_DATABASE,
+    )
+    AIRLINE_FILTER_AVAILABLE = True
+except ImportError:
+    AIRLINE_FILTER_AVAILABLE = False
+
 logger = logging.getLogger(__name__)
 
 # Tool definitions
@@ -708,6 +725,169 @@ Example: Find the best dates to fly around June 15th with 5 days flexibility."""
 )
 
 
+# Airline Filtering Tools
+SEARCH_AIRLINES_TOOL = Tool(
+    name="search_airlines",
+    description="""Search for airline information by name or code.
+
+Use this tool to find airline IATA codes, alliance memberships,
+and frequent flyer program details.
+
+Example: Search for "delta" or "emirates" to get airline details.""",
+    inputSchema={
+        "type": "object",
+        "properties": {
+            "query": {
+                "type": "string",
+                "description": "Airline name or IATA code to search for"
+            },
+            "limit": {
+                "type": "integer",
+                "description": "Maximum results to return",
+                "default": 10,
+                "minimum": 1,
+                "maximum": 50
+            }
+        },
+        "required": ["query"]
+    }
+)
+
+GET_ALLIANCE_AIRLINES_TOOL = Tool(
+    name="get_alliance_airlines",
+    description="""Get all airlines in a specific alliance.
+
+Use this tool to find partner airlines for earning/redeeming miles.
+Alliances: star_alliance, oneworld, skyteam.
+
+Example: Get all Star Alliance members to find mile-earning options.""",
+    inputSchema={
+        "type": "object",
+        "properties": {
+            "alliance": {
+                "type": "string",
+                "enum": ["star_alliance", "oneworld", "skyteam"],
+                "description": "Alliance name"
+            }
+        },
+        "required": ["alliance"]
+    }
+)
+
+FILTER_FLIGHTS_BY_AIRLINE_TOOL = Tool(
+    name="filter_flights_by_airline",
+    description="""Filter flight search results by airline preferences.
+
+Use this tool after search_flights to filter by specific airlines,
+alliances, aircraft types, or loyalty program preferences.
+
+Example: Filter to only show Star Alliance flights on wide-body aircraft.""",
+    inputSchema={
+        "type": "object",
+        "properties": {
+            "flights": {
+                "type": "array",
+                "items": {"type": "object"},
+                "description": "Flight results from search_flights"
+            },
+            "include_airlines": {
+                "type": "array",
+                "items": {"type": "string"},
+                "description": "Only include these airlines (IATA codes)"
+            },
+            "exclude_airlines": {
+                "type": "array",
+                "items": {"type": "string"},
+                "description": "Exclude these airlines (IATA codes)"
+            },
+            "alliances": {
+                "type": "array",
+                "items": {
+                    "type": "string",
+                    "enum": ["star_alliance", "oneworld", "skyteam"]
+                },
+                "description": "Only include flights from these alliances"
+            },
+            "exclude_alliances": {
+                "type": "array",
+                "items": {
+                    "type": "string",
+                    "enum": ["star_alliance", "oneworld", "skyteam"]
+                },
+                "description": "Exclude flights from these alliances"
+            },
+            "include_low_cost": {
+                "type": "boolean",
+                "description": "Include low-cost carriers",
+                "default": True
+            },
+            "only_low_cost": {
+                "type": "boolean",
+                "description": "Only show low-cost carriers",
+                "default": False
+            },
+            "wide_body_only": {
+                "type": "boolean",
+                "description": "Only show wide-body aircraft (more comfort)",
+                "default": False
+            },
+            "exclude_regional": {
+                "type": "boolean",
+                "description": "Exclude regional jets and turboprops",
+                "default": False
+            },
+            "preferred_airlines": {
+                "type": "array",
+                "items": {"type": "string"},
+                "description": "Airlines to prioritize in results (IATA codes)"
+            },
+            "loyalty_program": {
+                "type": "string",
+                "description": "User's loyalty program (e.g., 'SkyMiles', 'MileagePlus')"
+            }
+        },
+        "required": ["flights"]
+    }
+)
+
+GET_LOW_COST_CARRIERS_TOOL = Tool(
+    name="get_low_cost_carriers",
+    description="""Get list of low-cost/budget airlines.
+
+Use this tool to find budget-friendly carriers like Southwest, Spirit,
+Ryanair, etc. Returns airline codes and names.
+
+Example: Get low-cost carriers for budget travel planning.""",
+    inputSchema={
+        "type": "object",
+        "properties": {},
+        "required": []
+    }
+)
+
+GET_AIRLINE_INFO_TOOL = Tool(
+    name="get_airline_info",
+    description="""Get detailed information about a specific airline.
+
+Use this tool to find alliance membership, country, frequent flyer
+program, and low-cost status for an airline.
+
+Example: Get info for "DL" (Delta) or "EK" (Emirates).""",
+    inputSchema={
+        "type": "object",
+        "properties": {
+            "code": {
+                "type": "string",
+                "description": "Airline IATA code (2 letters)",
+                "minLength": 2,
+                "maxLength": 2
+            }
+        },
+        "required": ["code"]
+    }
+)
+
+
 def create_mcp_server() -> "Server":
     """
     Create and configure the MCP server with flight search tools.
@@ -759,6 +939,16 @@ def create_mcp_server() -> "Server":
                 SUGGEST_BEST_DATES_TOOL,
             ])
         
+        # Add airline filtering tools if available
+        if AIRLINE_FILTER_AVAILABLE:
+            tools.extend([
+                SEARCH_AIRLINES_TOOL,
+                GET_ALLIANCE_AIRLINES_TOOL,
+                FILTER_FLIGHTS_BY_AIRLINE_TOOL,
+                GET_LOW_COST_CARRIERS_TOOL,
+                GET_AIRLINE_INFO_TOOL,
+            ])
+        
         return tools
     
     @server.call_tool()
@@ -793,6 +983,16 @@ def create_mcp_server() -> "Server":
                 return await _handle_get_calendar_heatmap(arguments)
             elif name == "suggest_best_dates":
                 return await _handle_suggest_best_dates(arguments)
+            elif name == "search_airlines":
+                return await _handle_search_airlines(arguments)
+            elif name == "get_alliance_airlines":
+                return await _handle_get_alliance_airlines(arguments)
+            elif name == "filter_flights_by_airline":
+                return await _handle_filter_flights_by_airline(arguments)
+            elif name == "get_low_cost_carriers":
+                return await _handle_get_low_cost_carriers(arguments)
+            elif name == "get_airline_info":
+                return await _handle_get_airline_info(arguments)
             else:
                 return [TextContent(
                     type="text",
@@ -1262,6 +1462,181 @@ async def _handle_suggest_best_dates(arguments: dict[str, Any]) -> Sequence[Text
                 for i, r in enumerate(result.results)
             ],
             "average_price": result.average_price,
+        }, indent=2)
+    )]
+
+
+# Airline Filtering Handlers
+
+async def _handle_search_airlines(arguments: dict[str, Any]) -> Sequence[TextContent]:
+    """Handle the search_airlines tool call."""
+    if not AIRLINE_FILTER_AVAILABLE:
+        return [TextContent(
+            type="text",
+            text=json.dumps({
+                "error": "Airline filtering not available",
+                "suggestion": "Install with: pip install fast-flights[agent]"
+            }, indent=2)
+        )]
+    
+    results = search_airlines(
+        query=arguments["query"],
+        limit=arguments.get("limit", 10),
+    )
+    
+    return [TextContent(
+        type="text",
+        text=json.dumps({
+            "query": arguments["query"],
+            "total": len(results),
+            "airlines": [
+                {
+                    "code": a.code,
+                    "name": a.name,
+                    "alliance": a.alliance.value,
+                    "country": a.country,
+                    "is_low_cost": a.is_low_cost,
+                    "frequent_flyer_program": a.frequent_flyer_program,
+                }
+                for a in results
+            ],
+        }, indent=2)
+    )]
+
+
+async def _handle_get_alliance_airlines(arguments: dict[str, Any]) -> Sequence[TextContent]:
+    """Handle the get_alliance_airlines tool call."""
+    if not AIRLINE_FILTER_AVAILABLE:
+        return [TextContent(
+            type="text",
+            text=json.dumps({
+                "error": "Airline filtering not available",
+                "suggestion": "Install with: pip install fast-flights[agent]"
+            }, indent=2)
+        )]
+    
+    alliance = Alliance(arguments["alliance"])
+    airlines = get_airlines_by_alliance(alliance)
+    
+    return [TextContent(
+        type="text",
+        text=json.dumps({
+            "alliance": alliance.value,
+            "total_members": len(airlines),
+            "airlines": [
+                {
+                    "code": a.code,
+                    "name": a.name,
+                    "country": a.country,
+                    "frequent_flyer_program": a.frequent_flyer_program,
+                }
+                for a in airlines
+            ],
+            "hint": "Flights on these airlines can earn/redeem miles within the alliance"
+        }, indent=2)
+    )]
+
+
+async def _handle_filter_flights_by_airline(arguments: dict[str, Any]) -> Sequence[TextContent]:
+    """Handle the filter_flights_by_airline tool call."""
+    if not AIRLINE_FILTER_AVAILABLE:
+        return [TextContent(
+            type="text",
+            text=json.dumps({
+                "error": "Airline filtering not available",
+                "suggestion": "Install with: pip install fast-flights[agent]"
+            }, indent=2)
+        )]
+    
+    result = apply_airline_filters(
+        flights=arguments["flights"],
+        include_airlines=arguments.get("include_airlines"),
+        exclude_airlines=arguments.get("exclude_airlines"),
+        alliances=arguments.get("alliances"),
+        exclude_alliances=arguments.get("exclude_alliances"),
+        include_low_cost=arguments.get("include_low_cost", True),
+        only_low_cost=arguments.get("only_low_cost", False),
+        wide_body_only=arguments.get("wide_body_only", False),
+        exclude_regional=arguments.get("exclude_regional", False),
+        preferred_airlines=arguments.get("preferred_airlines"),
+        loyalty_program=arguments.get("loyalty_program"),
+    )
+    
+    return [TextContent(
+        type="text",
+        text=json.dumps({
+            "original_count": result.original_count,
+            "filtered_count": result.filtered_count,
+            "filters_applied": result.filters_applied,
+            "preferred_count": result.preferred_count,
+            "alliance_breakdown": result.alliance_breakdown,
+            "flights": result.flights,
+        }, indent=2)
+    )]
+
+
+async def _handle_get_low_cost_carriers(arguments: dict[str, Any]) -> Sequence[TextContent]:
+    """Handle the get_low_cost_carriers tool call."""
+    if not AIRLINE_FILTER_AVAILABLE:
+        return [TextContent(
+            type="text",
+            text=json.dumps({
+                "error": "Airline filtering not available",
+                "suggestion": "Install with: pip install fast-flights[agent]"
+            }, indent=2)
+        )]
+    
+    carriers = get_low_cost_carriers()
+    
+    return [TextContent(
+        type="text",
+        text=json.dumps({
+            "total": len(carriers),
+            "carriers": [
+                {
+                    "code": c.code,
+                    "name": c.name,
+                    "country": c.country,
+                }
+                for c in carriers
+            ],
+            "hint": "These airlines typically offer lower fares but may charge for extras"
+        }, indent=2)
+    )]
+
+
+async def _handle_get_airline_info(arguments: dict[str, Any]) -> Sequence[TextContent]:
+    """Handle the get_airline_info tool call."""
+    if not AIRLINE_FILTER_AVAILABLE:
+        return [TextContent(
+            type="text",
+            text=json.dumps({
+                "error": "Airline filtering not available",
+                "suggestion": "Install with: pip install fast-flights[agent]"
+            }, indent=2)
+        )]
+    
+    info = get_airline_info(arguments["code"])
+    
+    if not info:
+        return [TextContent(
+            type="text",
+            text=json.dumps({
+                "error": f"Airline not found: {arguments['code']}",
+                "suggestion": "Use search_airlines to find the correct code"
+            }, indent=2)
+        )]
+    
+    return [TextContent(
+        type="text",
+        text=json.dumps({
+            "code": info.code,
+            "name": info.name,
+            "alliance": info.alliance.value,
+            "country": info.country,
+            "is_low_cost": info.is_low_cost,
+            "frequent_flyer_program": info.frequent_flyer_program,
+            "alliance_partners": len(get_airlines_by_alliance(info.alliance)) if info.alliance != Alliance.NONE else 0,
         }, indent=2)
     )]
 

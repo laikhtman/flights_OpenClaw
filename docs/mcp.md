@@ -496,7 +496,149 @@ Get smart suggestions for optimal travel dates.
 
 ---
 
-## �🔧 Troubleshooting
+## ✈️ Airline Filtering Tools
+
+### 🔍 `search_airlines`
+
+Search for airline information by name or IATA code.
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `query` | string | ✅ | Airline name or IATA code |
+| `limit` | integer | ❌ | Max results (default: 10) |
+
+**Example Response:**
+
+```json
+{
+    "query": "delta",
+    "total": 1,
+    "airlines": [
+        {
+            "code": "DL",
+            "name": "Delta Air Lines",
+            "alliance": "skyteam",
+            "country": "US",
+            "is_low_cost": false,
+            "frequent_flyer_program": "SkyMiles"
+        }
+    ]
+}
+```
+
+---
+
+### 🌐 `get_alliance_airlines`
+
+Get all airlines in a specific alliance.
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `alliance` | string | ✅ | "star_alliance", "oneworld", or "skyteam" |
+
+**Example Response:**
+
+```json
+{
+    "alliance": "star_alliance",
+    "total_members": 26,
+    "airlines": [
+        {"code": "UA", "name": "United Airlines", "country": "US"},
+        {"code": "LH", "name": "Lufthansa", "country": "DE"},
+        {"code": "SQ", "name": "Singapore Airlines", "country": "SG"}
+    ],
+    "hint": "Flights on these airlines can earn/redeem miles within the alliance"
+}
+```
+
+---
+
+### 🎯 `filter_flights_by_airline`
+
+Filter flight search results by airline preferences.
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `flights` | array | ✅ | Flight results from search_flights |
+| `include_airlines` | array | ❌ | Only these airlines (IATA codes) |
+| `exclude_airlines` | array | ❌ | Exclude these airlines |
+| `alliances` | array | ❌ | Only these alliances |
+| `exclude_alliances` | array | ❌ | Exclude these alliances |
+| `include_low_cost` | boolean | ❌ | Include low-cost carriers (default: true) |
+| `only_low_cost` | boolean | ❌ | Only low-cost carriers |
+| `wide_body_only` | boolean | ❌ | Only wide-body aircraft |
+| `exclude_regional` | boolean | ❌ | Exclude regional jets |
+| `preferred_airlines` | array | ❌ | Airlines to prioritize |
+| `loyalty_program` | string | ❌ | User's loyalty program |
+
+**Example Response:**
+
+```json
+{
+    "original_count": 15,
+    "filtered_count": 8,
+    "filters_applied": ["Alliances: star_alliance", "No low-cost carriers"],
+    "preferred_count": 3,
+    "alliance_breakdown": {"star_alliance": 8},
+    "flights": [...]
+}
+```
+
+---
+
+### 💰 `get_low_cost_carriers`
+
+Get list of budget airlines.
+
+**Example Response:**
+
+```json
+{
+    "total": 8,
+    "carriers": [
+        {"code": "WN", "name": "Southwest Airlines", "country": "US"},
+        {"code": "FR", "name": "Ryanair", "country": "IE"},
+        {"code": "NK", "name": "Spirit Airlines", "country": "US"}
+    ],
+    "hint": "These airlines typically offer lower fares but may charge for extras"
+}
+```
+
+---
+
+### ℹ️ `get_airline_info`
+
+Get detailed information about a specific airline.
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `code` | string | ✅ | Airline IATA code (2 letters) |
+
+**Example Response:**
+
+```json
+{
+    "code": "DL",
+    "name": "Delta Air Lines",
+    "alliance": "skyteam",
+    "country": "US",
+    "is_low_cost": false,
+    "frequent_flyer_program": "SkyMiles",
+    "alliance_partners": 19
+}
+```
+
+---
+
+## 🔧 Troubleshooting
 
 ### "MCP package not installed"
 

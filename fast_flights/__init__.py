@@ -173,6 +173,54 @@ except ImportError:
     generate_weekday_dates = None  # type: ignore
     generate_month_dates = None  # type: ignore
 
+# Airline Filtering API (optional)
+try:
+    from .airline_filter import (
+        Alliance,
+        AircraftCategory,
+        AirlineInfo,
+        AirlineFilterConfig,
+        FilteredFlightResult,
+        get_airline_info,
+        get_airline_alliance,
+        get_airlines_by_alliance,
+        search_airlines,
+        get_aircraft_category,
+        is_wide_body,
+        filter_flights,
+        rank_flights_by_preference,
+        apply_airline_filters,
+        get_low_cost_carriers,
+        get_airlines_with_program,
+        AIRLINES_DATABASE,
+        STAR_ALLIANCE_MEMBERS,
+        ONEWORLD_MEMBERS,
+        SKYTEAM_MEMBERS,
+    )
+    _AIRLINE_FILTER_AVAILABLE = True
+except ImportError:
+    _AIRLINE_FILTER_AVAILABLE = False
+    Alliance = None  # type: ignore
+    AircraftCategory = None  # type: ignore
+    AirlineInfo = None  # type: ignore
+    AirlineFilterConfig = None  # type: ignore
+    FilteredFlightResult = None  # type: ignore
+    get_airline_info = None  # type: ignore
+    get_airline_alliance = None  # type: ignore
+    get_airlines_by_alliance = None  # type: ignore
+    search_airlines = None  # type: ignore
+    get_aircraft_category = None  # type: ignore
+    is_wide_body = None  # type: ignore
+    filter_flights = None  # type: ignore
+    rank_flights_by_preference = None  # type: ignore
+    apply_airline_filters = None  # type: ignore
+    get_low_cost_carriers = None  # type: ignore
+    get_airlines_with_program = None  # type: ignore
+    AIRLINES_DATABASE = None  # type: ignore
+    STAR_ALLIANCE_MEMBERS = None  # type: ignore
+    ONEWORLD_MEMBERS = None  # type: ignore
+    SKYTEAM_MEMBERS = None  # type: ignore
+
 __all__ = [
     # Core API
     "Airport",
@@ -260,6 +308,27 @@ __all__ = [
     "generate_weekend_dates",
     "generate_weekday_dates",
     "generate_month_dates",
+    # Airline Filtering API
+    "Alliance",
+    "AircraftCategory",
+    "AirlineInfo",
+    "AirlineFilterConfig",
+    "FilteredFlightResult",
+    "get_airline_info",
+    "get_airline_alliance",
+    "get_airlines_by_alliance",
+    "search_airlines",
+    "get_aircraft_category",
+    "is_wide_body",
+    "filter_flights",
+    "rank_flights_by_preference",
+    "apply_airline_filters",
+    "get_low_cost_carriers",
+    "get_airlines_with_program",
+    "AIRLINES_DATABASE",
+    "STAR_ALLIANCE_MEMBERS",
+    "ONEWORLD_MEMBERS",
+    "SKYTEAM_MEMBERS",
 ]
 
 # Backwards-compatible name: try to resolve Cookies lazily if accessed
