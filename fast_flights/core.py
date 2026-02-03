@@ -1,3 +1,34 @@
+"""
+Core flight search functionality.
+
+This module provides the main functions for searching flights on Google Flights.
+It supports multiple fetch modes for reliability and different data sources for parsing.
+
+For AI agent integration, consider using the simplified API in `fast_flights.agent_api`.
+
+Main Functions:
+    - get_flights(): High-level function with convenient parameters
+    - get_flights_from_filter(): Lower-level function using TFSData filter
+    - parse_response(): Parse flight data from HTTP response
+
+Fetch Modes:
+    - "common": Direct HTTP request (fastest, may be blocked by Google)
+    - "fallback": Try common first, fall back to playwright if blocked
+    - "force-fallback": Always use remote playwright service
+    - "local": Use local playwright installation (requires playwright package)
+    - "bright-data": Use Bright Data SERP API (requires API key)
+
+Example:
+    >>> from fast_flights import get_flights, FlightData, Passengers
+    >>> result = get_flights(
+    ...     flight_data=[FlightData(date="2025-06-15", from_airport="JFK", to_airport="LAX")],
+    ...     trip="one-way",
+    ...     seat="economy",
+    ...     adults=2
+    ... )
+    >>> print(f"Found {len(result.flights)} flights")
+"""
+
 import re
 import json
 from typing import List, Literal, Optional, Union
@@ -14,6 +45,7 @@ from .primp import Client, Response
 
 
 DataSource = Literal['html', 'js']
+"""Type alias for data source: 'html' for HTML parsing, 'js' for JavaScript data extraction."""
 
 # Default cookies embedded into the app to help bypass common consent gating.
 # These are used only if the caller does not supply cookies (binary) and
@@ -26,6 +58,22 @@ _DEFAULT_COOKIES_BYTES = json.dumps(_DEFAULT_COOKIES).encode("utf-8")
 
 
 def fetch(params: dict, request_kwargs: dict | None = None) -> Response:
+    """
+    Make a direct HTTP request to Google Flights.
+    
+    This is the fastest method but may be blocked by Google's bot detection.
+    For more reliable results, use fetch_mode="fallback" in get_flights().
+    
+    Args:
+        params: URL query parameters including 'tfs' (the encoded search filter)
+        request_kwargs: Additional kwargs passed to the HTTP client (headers, cookies, etc.)
+        
+    Returns:
+        Response object from the HTTP client
+        
+    Raises:
+        AssertionError: If the response status code is not 200
+    """
     client = Client(impersonate="chrome_126", verify=False)
     # Pass through any extra request kwargs (e.g., cookies, headers)
     req_kwargs = request_kwargs.copy() if request_kwargs else {}
@@ -101,6 +149,55 @@ def get_flights_from_filter(
     request_kwargs: dict | None = None,
     cookie_consent: bool = True,
 ) -> Union[Result, DecodedResult, None]:
+    """
+    Search for flights using a pre-built TFSData filter.
+    
+    This is the lower-level search function. For most use cases, prefer
+    get_flights() which provides a more convenient interface.
+    
+    For AI agent integration, use search_flights() from fast_flights.agent_api.
+    
+    Args:
+        filter: TFSData object containing the encoded search parameters.
+            Create with create_filter() or TFSData.from_interface().
+        currency: Currency code for prices (e.g., "USD", "EUR"). Empty for default.
+        mode: Fetch strategy:
+            - "common": Direct HTTP request (fastest, may be blocked)
+            - "fallback": Try common first, fall back to playwright if blocked
+            - "force-fallback": Always use remote playwright service
+            - "local": Use local playwright (requires playwright package)
+            - "bright-data": Use Bright Data SERP API (requires BRIGHT_DATA_API_KEY env var)
+        data_source: How to parse the response:
+            - "html": Parse flight data from HTML (more fields, may break with changes)
+            - "js": Extract from embedded JavaScript (more stable, fewer fields)
+        cookies: Custom cookies as bytes. Supports:
+            - JSON bytes: {"name": "value"}
+            - Pickle bytes: pickled dict
+            - Raw string: Cookie header value
+        request_kwargs: Additional kwargs for HTTP client (headers, timeout, etc.)
+        cookie_consent: If True and no cookies provided, use embedded consent cookies.
+            Set to False if you handle cookies yourself.
+    
+    Returns:
+        Result: When data_source="html", contains current_price and flights list.
+        DecodedResult: When data_source="js", contains best and other flight lists.
+        None: If no flights found and parsing fails gracefully.
+        
+    Raises:
+        RuntimeError: If no flights found in the response.
+        AssertionError: If HTTP request fails without fallback mode.
+        
+    Example:
+        >>> from fast_flights import create_filter, get_flights_from_filter, FlightData, Passengers
+        >>> filter = create_filter(
+        ...     flight_data=[FlightData(date="2025-06-15", from_airport="JFK", to_airport="LAX")],
+        ...     trip="one-way",
+        ...     passengers=Passengers(adults=1),
+        ...     seat="economy"
+        ... )
+        >>> result = get_flights_from_filter(filter, mode="fallback")
+        >>> print(result.flights[0].price)
+    """
     data = filter.as_b64()
 
     params = {
@@ -172,6 +269,72 @@ def get_flights(
     request_kwargs: dict | None = None,
     cookie_consent: bool = True,
 ) -> Union[Result, DecodedResult, None]:
+    """
+    Search for flights on Google Flights.
+    
+    This is the main entry point for flight searches. It provides a convenient
+    interface with sensible defaults. For AI agent integration, consider using
+    search_flights() from fast_flights.agent_api which returns structured responses.
+    
+    Args:
+        flight_data: List of FlightData objects specifying routes and dates.
+            For one-way: single FlightData with departure info.
+            For round-trip: two FlightData objects (outbound and return).
+        trip: Trip type - "one-way", "round-trip", or "multi-city".
+            Note: "multi-city" is not fully supported yet.
+        passengers: Passengers object specifying passenger counts.
+            If None, uses the individual passenger count arguments below.
+        adults: Number of adult passengers (default: 1 if passengers is None).
+        children: Number of child passengers aged 2-11 (default: 0).
+        infants_in_seat: Number of infants with own seat (default: 0).
+        infants_on_lap: Number of lap infants under 2 (default: 0).
+        seat: Seat class - "economy", "premium-economy", "business", or "first".
+        fetch_mode: HTTP fetching strategy:
+            - "common": Direct request (fastest, may be blocked by Google)
+            - "fallback": Try common first, fall back to playwright if blocked (recommended)
+            - "force-fallback": Always use remote playwright service
+            - "local": Use local playwright installation (requires playwright)
+            - "bright-data": Use Bright Data SERP API (requires BRIGHT_DATA_API_KEY)
+        max_stops: Maximum number of stops (0=nonstop, 1, 2, or None for any).
+        data_source: How to parse the response:
+            - "html": Parse from HTML (more fields like is_best, delay)
+            - "js": Extract from JavaScript (more stable but fewer fields)
+        cookies: Custom cookies as bytes (JSON, pickle, or raw Cookie header).
+        request_kwargs: Additional kwargs for HTTP client (headers, timeout, etc.).
+        cookie_consent: Use embedded consent cookies if no cookies provided.
+    
+    Returns:
+        Result: When data_source="html", with current_price and flights list.
+        DecodedResult: When data_source="js", with best and other flight lists.
+        None: If no flights found (in some cases).
+    
+    Raises:
+        RuntimeError: If no flights found in the response.
+        AssertionError: If HTTP request fails and no fallback available.
+    
+    Example:
+        One-way flight:
+        >>> result = get_flights(
+        ...     flight_data=[FlightData(date="2025-06-15", from_airport="JFK", to_airport="LAX")],
+        ...     trip="one-way",
+        ...     seat="economy",
+        ...     adults=2,
+        ...     fetch_mode="fallback"
+        ... )
+        >>> print(f"Price level: {result.current_price}")
+        >>> print(f"Cheapest: {result.flights[0].price}")
+        
+        Round-trip flight:
+        >>> result = get_flights(
+        ...     flight_data=[
+        ...         FlightData(date="2025-06-15", from_airport="JFK", to_airport="LAX"),
+        ...         FlightData(date="2025-06-22", from_airport="LAX", to_airport="JFK")
+        ...     ],
+        ...     trip="round-trip",
+        ...     seat="business",
+        ...     passengers=Passengers(adults=1, children=1)
+        ... )
+    """
     # If the caller didn't supply a Passengers object, build one from the
     # convenience counters. Default to 1 adult when no adults count provided
     # (matches previous typical usage where at least one adult is expected).
@@ -209,6 +372,40 @@ def parse_response(
      *,
      dangerously_allow_looping_last_item: bool = False,
  ) -> Union[Result, DecodedResult, None]:
+    """
+    Parse flight data from an HTTP response.
+    
+    This function extracts flight information from the Google Flights response.
+    It supports two parsing modes: HTML parsing and JavaScript data extraction.
+    
+    Args:
+        r: Response object from the HTTP client.
+        data_source: Parsing method:
+            - "html": Parse from HTML DOM (more fields like is_best, delay)
+            - "js": Extract from embedded JavaScript data (more stable)
+        dangerously_allow_looping_last_item: If True, includes the last item
+            in non-best flight lists. Usually should be False to avoid
+            parsing artifacts.
+    
+    Returns:
+        Result: When data_source="html", contains:
+            - current_price: "low", "typical", or "high"
+            - flights: List of Flight objects with full details
+        DecodedResult: When data_source="js", contains:
+            - raw: The raw parsed data
+            - best: List of best Itinerary objects
+            - other: List of other Itinerary objects
+        None: If data_source="js" and no data found.
+    
+    Raises:
+        RuntimeError: If no flights found in the HTML response.
+        AssertionError: If JavaScript data is malformed.
+    
+    Note:
+        HTML parsing is more comprehensive but may break if Google changes
+        their page structure. JavaScript parsing is more stable but provides
+        fewer fields.
+    """
     class _blank:
         def text(self, *_, **__):
             return ""

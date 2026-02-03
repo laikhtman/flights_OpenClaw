@@ -28,6 +28,21 @@ dependencies = [
 local = [
     "playwright"
 ]
+agent = [
+    "pydantic>=2.0",
+    "pydantic-settings>=2.0",
+]
+mcp = [
+    "mcp>=1.0",
+    "pydantic>=2.0",
+    "pydantic-settings>=2.0",
+]
+all = [
+    "playwright",
+    "pydantic>=2.0",
+    "pydantic-settings>=2.0",
+    "mcp>=1.0",
+]
 
 [project.urls]
 "Source" = "https://github.com/AWeirdDev/flights"
