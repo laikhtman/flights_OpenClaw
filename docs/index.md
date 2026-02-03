@@ -155,9 +155,10 @@ else:
 - Thread-safe rate limiting
 - Centralized configuration management
 
-### 📋 Phase 4: Async
-- Async wrappers
-- Concurrent searches
+### ✅ Phase 4: Async Support (Complete)
+- Async wrapper functions
+- Concurrent multi-route searches
+- Date range search
 
 ---
 

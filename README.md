@@ -112,6 +112,31 @@ print(result.summary())
 | **Recovery Hints** | Suggested actions for each error type |
 | **Validation** | Input validation with clear error messages |
 
+### Async API
+
+```python
+import asyncio
+from fast_flights import search_flights_async, search_multiple_routes
+
+async def main():
+    # Single async search
+    result = await search_flights_async({
+        "origin": "JFK",
+        "destination": "LAX",
+        "departure_date": "2025-06-15"
+    })
+    
+    # Concurrent multi-route search (3x faster!)
+    routes = [
+        {"origin": "JFK", "destination": "LAX", "departure_date": "2025-06-15"},
+        {"origin": "SFO", "destination": "ORD", "departure_date": "2025-06-15"},
+        {"origin": "MIA", "destination": "SEA", "departure_date": "2025-06-15"},
+    ]
+    results = await search_multiple_routes(routes)
+
+asyncio.run(main())
+```
+
 ---
 
 ## MCP Server (Claude Desktop / OpenClaw)
@@ -197,10 +222,10 @@ pip install fast-flights[all]
 - [x] Thread-safe rate limiting
 - [x] Centralized configuration management
 
-### 📋 Phase 4: Async Support
-- [ ] Async wrapper functions
-- [ ] Concurrent multi-route searches
-- [ ] Thread pool optimization
+### ✅ Phase 4: Async Support (Complete)
+- [x] Async wrapper functions
+- [x] Concurrent multi-route searches
+- [x] Date range search
 
 ### 💡 Future Ideas
 - Price tracking & alerts

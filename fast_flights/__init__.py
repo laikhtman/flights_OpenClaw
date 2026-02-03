@@ -72,6 +72,30 @@ from .config import FlightConfig, get_config, configure, reset_config
 from .retry import retry_with_backoff, RetryContext, is_retryable_error
 from .rate_limit import RateLimiter, get_rate_limiter, rate_limited
 
+# Async API (optional - requires pydantic)
+try:
+    from .async_api import (
+        search_flights_async,
+        search_airports_async,
+        compare_flight_dates_async,
+        search_multiple_routes,
+        search_date_range,
+        run_in_executor,
+        get_executor,
+        shutdown_executor,
+    )
+    _ASYNC_API_AVAILABLE = True
+except ImportError:
+    _ASYNC_API_AVAILABLE = False
+    search_flights_async = None  # type: ignore
+    search_airports_async = None  # type: ignore
+    compare_flight_dates_async = None  # type: ignore
+    search_multiple_routes = None  # type: ignore
+    search_date_range = None  # type: ignore
+    run_in_executor = None  # type: ignore
+    get_executor = None  # type: ignore
+    shutdown_executor = None  # type: ignore
+
 __all__ = [
     # Core API
     "Airport",
@@ -107,6 +131,15 @@ __all__ = [
     "RateLimiter",
     "get_rate_limiter",
     "rate_limited",
+    # Async API (requires pydantic)
+    "search_flights_async",
+    "search_airports_async",
+    "compare_flight_dates_async",
+    "search_multiple_routes",
+    "search_date_range",
+    "run_in_executor",
+    "get_executor",
+    "shutdown_executor",
 ]
 
 # Backwards-compatible name: try to resolve Cookies lazily if accessed
