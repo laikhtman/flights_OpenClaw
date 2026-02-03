@@ -264,12 +264,61 @@ pip install fast-flights[agent]
 # With MCP server support
 pip install fast-flights[mcp]
 
+# With HTTP API server
+pip install fast-flights[api]
+
 # With local Playwright
 pip install fast-flights[local]
 
 # Everything
 pip install fast-flights[all]
 ```
+
+---
+
+## HTTP API Server
+
+Fast Flights includes a production-ready REST API built with FastAPI.
+
+### Quick Start
+
+```bash
+# Install
+pip install fast-flights[api]
+
+# Run the server
+fast-flights-api
+
+# Or with uvicorn
+uvicorn fast_flights.http_api:app --reload
+```
+
+Visit http://localhost:8000/docs for interactive Swagger documentation.
+
+### Docker
+
+```bash
+# Run with Docker
+docker build -t fast-flights-api .
+docker run -p 8000:8000 fast-flights-api
+
+# Or use Docker Compose (includes Redis)
+docker-compose up -d
+```
+
+### Example API Call
+
+```bash
+curl -X POST http://localhost:8000/search \
+  -H "Content-Type: application/json" \
+  -d '{
+    "origin": "JFK",
+    "destination": "LAX",
+    "departure_date": "2025-06-15"
+  }'
+```
+
+See [HTTP API Documentation](docs/http-api.md) for full details.
 
 ---
 
@@ -332,20 +381,28 @@ pip install fast-flights[all]
   - [x] `get_low_cost_carriers` - List budget airlines
   - [x] `get_airline_info` - Get airline details
 
-### 🌐 Phase 8: HTTP API (FastAPI)
-- [ ] **REST API endpoints**
-  - [ ] `POST /search` - Flight search
-  - [ ] `GET /airports` - Airport lookup
-  - [ ] `POST /compare` - Date comparison
-  - [ ] `GET /health` - Health check
-- [ ] **API features**
-  - [ ] OpenAPI/Swagger documentation
-  - [ ] API key authentication
-  - [ ] Rate limiting middleware
-  - [ ] Request/response logging
-- [ ] **Deployment**
-  - [ ] Docker container
-  - [ ] Docker Compose with Redis cache
+### 🌐 Phase 8: HTTP API (FastAPI) ✅
+- [x] **REST API endpoints**
+  - [x] `POST /search` - Flight search
+  - [x] `GET /airports` - Airport lookup
+  - [x] `POST /compare` - Date comparison
+  - [x] `GET /health` - Health check
+  - [x] `POST /flexible-search` - Flexible date search
+  - [x] `GET /weekend-flights` - Weekend flight search
+  - [x] `POST /calendar-heatmap` - Monthly price calendar
+  - [x] `POST /track` - Start price tracking
+  - [x] `GET /price-history` - Historical prices
+  - [x] `POST /alerts` - Set price alerts
+  - [x] `GET /airlines/search` - Search airlines
+  - [x] `POST /filter-flights` - Filter by airline
+- [x] **API features**
+  - [x] OpenAPI/Swagger documentation
+  - [x] API key authentication
+  - [x] Rate limiting middleware
+  - [x] Request/response logging
+- [x] **Deployment**
+  - [x] Docker container
+  - [x] Docker Compose with Redis cache
   - [ ] Kubernetes manifests
   - [ ] Cloud Run / Railway templates
 

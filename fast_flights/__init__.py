@@ -221,6 +221,15 @@ except ImportError:
     ONEWORLD_MEMBERS = None  # type: ignore
     SKYTEAM_MEMBERS = None  # type: ignore
 
+# HTTP API (optional - requires fastapi)
+try:
+    from .http_api import app as http_app, run as run_http_api
+    _HTTP_API_AVAILABLE = True
+except ImportError:
+    _HTTP_API_AVAILABLE = False
+    http_app = None  # type: ignore
+    run_http_api = None  # type: ignore
+
 __all__ = [
     # Core API
     "Airport",
@@ -329,6 +338,9 @@ __all__ = [
     "STAR_ALLIANCE_MEMBERS",
     "ONEWORLD_MEMBERS",
     "SKYTEAM_MEMBERS",
+    # HTTP API (requires fastapi)
+    "http_app",
+    "run_http_api",
 ]
 
 # Backwards-compatible name: try to resolve Cookies lazily if accessed

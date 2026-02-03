@@ -1,0 +1,82 @@
+# Fast Flights API - Docker Compose Configuration
+# Includes the API server with optional Redis cache
+
+version: '3.8'
+
+services:
+  # Main API server
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: fast-flights-api
+    ports:
+      - "${PORT:-8000}:8000"
+    environment:
+      # API Configuration
+      - FAST_FLIGHTS_API_KEY=${FAST_FLIGHTS_API_KEY:-}
+      - FAST_FLIGHTS_RATE_LIMIT=${FAST_FLIGHTS_RATE_LIMIT:-60}
+      - FAST_FLIGHTS_CORS_ORIGINS=${FAST_FLIGHTS_CORS_ORIGINS:-*}
+      
+      # Redis Cache (optional)
+      - REDIS_URL=redis://redis:6379/0
+      
+      # Debug mode
+      - DEBUG=${DEBUG:-false}
+      
+      # Python
+      - PYTHONUNBUFFERED=1
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - fast-flights-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # Redis cache for rate limiting and caching
+  redis:
+    image: redis:7-alpine
+    container_name: fast-flights-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    command: redis-server --appendonly yes
+    restart: unless-stopped
+    networks:
+      - fast-flights-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  redis-data:
+    driver: local
+
+networks:
+  fast-flights-network:
+    driver: bridge
+
+---
+# Development override - use with: docker-compose -f docker-compose.yml -f docker-compose.dev.yml up
+# docker-compose.dev.yml (in separate file):
+#
+# version: '3.8'
+# services:
+#   api:
+#     build:
+#       context: .
+#       target: builder
+#     volumes:
+#       - .:/app
+#     command: uvicorn fast_flights.http_api:app --reload --host 0.0.0.0 --port 8000
+#     environment:
+#       - DEBUG=true

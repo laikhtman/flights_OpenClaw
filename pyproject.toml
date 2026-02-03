@@ -64,15 +64,26 @@ mcp = [
     "pydantic>=2.0",
     "pydantic-settings>=2.0",
 ]
+api = [
+    "fastapi>=0.109.0",
+    "uvicorn[standard]>=0.27.0",
+    "python-multipart>=0.0.6",
+    "pydantic>=2.0",
+    "pydantic-settings>=2.0",
+]
 all = [
     "playwright",
     "pydantic>=2.0",
     "pydantic-settings>=2.0",
     "mcp>=1.0",
+    "fastapi>=0.109.0",
+    "uvicorn[standard]>=0.27.0",
+    "python-multipart>=0.0.6",
 ]
 
 [project.scripts]
 fast-flights-mcp = "fast_flights.mcp_server:run"
+fast-flights-api = "fast_flights.http_api:run"
 
 [project.urls]
 "Source" = "https://github.com/laikhtman/flights_OpenClaw"
