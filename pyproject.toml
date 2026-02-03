@@ -5,17 +5,44 @@ build-backend = "flit_core.buildapi"
 [project]
 name = "fast-flights"
 version = "2.2"
-description = "The fast, robust, strongly-typed Google Flights scraper (API) implemented in Python."
-keywords = ["flights", "google", "google-flights", "scraper", "protobuf", "travel", "trip", "passengers", "airport"]
+description = "AI-agent-ready Google Flights scraper for Python. MCP server for Claude Desktop & OpenClaw. Structured JSON responses, Pydantic models, retry logic."
+keywords = [
+    "flights", 
+    "google-flights", 
+    "scraper", 
+    "protobuf", 
+    "travel",
+    "ai-agent",
+    "openclaw",
+    "mcp",
+    "model-context-protocol",
+    "claude",
+    "llm",
+    "pydantic",
+    "async",
+    "flight-search",
+    "airport"
+]
 authors = [
   { name = "AWeirdDev", email = "aweirdscratcher@gmail.com" },
+  { name = "laikhtman" },
 ]
 license = { file = "LICENSE" }
 readme = "README.md"
 classifiers = [
     "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Topic :: Internet :: WWW/HTTP :: Dynamic Content",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Typing :: Typed",
 ]
 requires-python = ">=3.8"
 dependencies = [

@@ -1,6 +1,9 @@
-# MCP Server
+# 🔧 MCP Server
 
-The MCP (Model Context Protocol) server allows AI agents like Claude Desktop and OpenClaw to use fast-flights as a tool.
+The MCP (Model Context Protocol) server allows AI agents like **OpenClaw**, **Claude Desktop**, and other MCP-compatible clients to use fast-flights as a tool.
+
+[![MCP Compatible](https://img.shields.io/badge/MCP-Compatible-purple.svg)](https://modelcontextprotocol.io)
+[![OpenClaw Ready](https://img.shields.io/badge/OpenClaw-Ready-orange.svg)](https://openclaw.io)
 
 ---
 
@@ -28,22 +31,7 @@ python -m fast_flights.mcp_server
 
 ## Configuration
 
-### Claude Desktop
-
-Add to your Claude Desktop configuration (`claude_desktop_config.json`):
-
-```json
-{
-    "mcpServers": {
-        "fast-flights": {
-            "command": "python",
-            "args": ["-m", "fast_flights.mcp_server"]
-        }
-    }
-}
-```
-
-### OpenClaw
+### 🦎 OpenClaw
 
 Add to your OpenClaw server configuration:
 
@@ -60,15 +48,30 @@ Add to your OpenClaw server configuration:
 }
 ```
 
-### Custom MCP Clients
+### 🤖 Claude Desktop
+
+Add to your Claude Desktop configuration (`claude_desktop_config.json`):
+
+```json
+{
+    "mcpServers": {
+        "fast-flights": {
+            "command": "python",
+            "args": ["-m", "fast_flights.mcp_server"]
+        }
+    }
+}
+```
+
+### ⚙️ Custom MCP Clients
 
 The server uses stdio transport. Connect to it by spawning the process and communicating via stdin/stdout.
 
 ---
 
-## Available Tools
+## 🛠️ Available Tools
 
-### `search_flights`
+### ✈️ `search_flights`
 
 Search for flights between airports.
 
@@ -109,7 +112,7 @@ Search for flights between airports.
 
 ---
 
-### `search_airport`
+### 🔍 `search_airport`
 
 Find airport codes by name or city.
 
@@ -167,7 +170,7 @@ Compare prices across multiple dates.
 
 ---
 
-## Troubleshooting
+## 🔧 Troubleshooting
 
 ### "MCP package not installed"
 
@@ -191,7 +194,7 @@ pip install pydantic pydantic-settings
 
 ---
 
-## Logging
+## 📋 Logging
 
 The server logs to stderr. Set the log level via environment variable:
 

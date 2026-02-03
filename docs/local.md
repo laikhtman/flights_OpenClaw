@@ -1,4 +1,4 @@
-# Local Playwright
+# 🖥️ Local Playwright
 
 In case the Playwright serverless functions are down or you prefer not to use them, you can run the Playwright server locally and request against that.
 

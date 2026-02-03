@@ -1,24 +1,27 @@
-# AI Agent Integration Guide for fast-flights
+# 🤖 AI Agent Integration Guide for fast-flights
 
-This document outlines proposed fixes and changes to make `fast-flights` work seamlessly with AI agent services like OpenClaw. The recommendations focus on improving API consistency, error handling, structured outputs, and providing MCP (Model Context Protocol) server capabilities.
+[![OpenClaw Ready](https://img.shields.io/badge/OpenClaw-Ready-orange.svg)](https://openclaw.io)
+[![MCP Compatible](https://img.shields.io/badge/MCP-Compatible-purple.svg)](https://modelcontextprotocol.io)
 
----
-
-## Table of Contents
-
-1. [Executive Summary](#executive-summary)
-2. [High-Priority Changes](#high-priority-changes)
-3. [API Design Improvements](#api-design-improvements)
-4. [Error Handling & Reliability](#error-handling--reliability)
-5. [Structured Output Enhancements](#structured-output-enhancements)
-6. [MCP Server Implementation](#mcp-server-implementation)
-7. [Configuration Management](#configuration-management)
-8. [Testing & Validation](#testing--validation)
-9. [Implementation Roadmap](#implementation-roadmap)
+This document outlines proposed fixes and changes to make `fast-flights` work seamlessly with AI agent services like **OpenClaw**, **Claude Desktop**, and other MCP-compatible clients. The recommendations focus on improving API consistency, error handling, structured outputs, and providing MCP (Model Context Protocol) server capabilities.
 
 ---
 
-## Executive Summary
+## 📋 Table of Contents
+
+1. [⚡ Executive Summary](#executive-summary)
+2. [🚨 High-Priority Changes](#high-priority-changes)
+3. [🎯 API Design Improvements](#api-design-improvements)
+4. [🛡️ Error Handling & Reliability](#error-handling--reliability)
+5. [📊 Structured Output Enhancements](#structured-output-enhancements)
+6. [🔧 MCP Server Implementation](#mcp-server-implementation)
+7. [⚙️ Configuration Management](#configuration-management)
+8. [🧪 Testing & Validation](#testing--validation)
+9. [🗺️ Implementation Roadmap](#implementation-roadmap)
+
+---
+
+## ⚡ Executive Summary
 
 The `fast-flights` library is a well-structured Google Flights scraper with Protobuf-based query generation. To integrate effectively with AI agents, the library needs:
 
@@ -31,7 +34,7 @@ The `fast-flights` library is a well-structured Google Flights scraper with Prot
 
 ---
 
-## High-Priority Changes
+## 🚨 High-Priority Changes
 
 ### 1. Add Pydantic Models for Validation & Serialization
 
@@ -232,7 +235,7 @@ def search_flights(request: Union[FlightSearchRequest, dict]) -> FlightSearchRes
 
 ---
 
-## API Design Improvements
+## 🎯 API Design Improvements
 
 ### 3. Add Async Support
 
@@ -346,7 +349,7 @@ def get_flights(
 
 ---
 
-## Error Handling & Reliability
+## 🛡️ Error Handling & Reliability
 
 ### 5. Structured Error Responses
 
@@ -484,7 +487,7 @@ def retry_with_backoff(
 
 ---
 
-## MCP Server Implementation
+## 🔧 MCP Server Implementation
 
 ### 7. Create MCP Server for Agent Integration
 
@@ -791,7 +794,7 @@ if __name__ == "__main__":
 
 ---
 
-## Configuration Management
+## ⚙️ Configuration Management
 
 ### 9. Centralized Configuration
 
@@ -861,7 +864,7 @@ def configure(**kwargs) -> FlightConfig:
 
 ---
 
-## Testing & Validation
+## 🧪 Testing & Validation
 
 ### 10. Add Test Fixtures for Agent Integration
 
@@ -937,7 +940,7 @@ class TestAgentAPI:
 
 ---
 
-## Implementation Roadmap
+## 🗺️ Implementation Roadmap
 
 ### Phase 1: Core API Improvements (Priority: High)
 1. ✅ Add Pydantic models for schema validation
@@ -968,7 +971,7 @@ class TestAgentAPI:
 
 ---
 
-## Updated `pyproject.toml` Dependencies
+## 📦 Updated `pyproject.toml` Dependencies
 
 ```toml
 # Add to pyproject.toml
@@ -996,7 +999,7 @@ fast-flights-mcp = "fast_flights.mcp_server:main"
 
 ---
 
-## Updated `__init__.py` Exports
+## 📝 Updated `__init__.py` Exports
 
 ```python
 # Add to fast_flights/__init__.py
@@ -1033,7 +1036,7 @@ __all__ = [
 
 ---
 
-## Summary
+## ✅ Summary
 
 These changes will transform `fast-flights` into an AI-agent-ready library with:
 

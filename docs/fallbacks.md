@@ -1,5 +1,6 @@
-# Fallbacks
-Just in case anything goes wrong, we've added falbacks extending Playwright serverless functions:
+# 🔄 Fallbacks
+
+Just in case anything goes wrong, we've added fallbacks extending Playwright serverless functions:
 
 ```python
 get_flights(

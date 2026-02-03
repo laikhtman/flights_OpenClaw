@@ -2,31 +2,39 @@
 
 # ✈️ flights_OpenClaw
 
-A fast, AI-agent-ready Google Flights scraper for Python.
+**AI-Agent-Ready Google Flights Scraper for Python**
+
+*Built for [OpenClaw](https://openclaw.io) and AI Agents*
 
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![MCP Compatible](https://img.shields.io/badge/MCP-Compatible-purple.svg)](https://modelcontextprotocol.io)
+[![OpenClaw Ready](https://img.shields.io/badge/OpenClaw-Ready-orange.svg)](https://openclaw.io)
+[![PyPI](https://img.shields.io/pypi/v/fast-flights.svg)](https://pypi.org/project/fast-flights/)
 
-[**Quick Start**](#quick-start) • [**AI Agent API**](#ai-agent-integration) • [**Docs**](docs/) • [**Roadmap**](#roadmap)
+[**Quick Start**](#quick-start) • [**🤖 AI Agent API**](#ai-agent-integration) • [**🔧 MCP Server**](#mcp-server-claude-desktop--openclaw) • [**📚 Docs**](docs/) • [**🗺️ Roadmap**](#roadmap)
 
 ```bash
-pip install fast-flights
+pip install fast-flights[agent]  # For AI agents
+pip install fast-flights[mcp]    # For MCP server
 ```
 
 </div>
 
 ---
 
-## What is this?
+## 🤖 What is this?
 
 This is a fork of [AWeirdDev/flights](https://github.com/AWeirdDev/flights) — a brilliant Google Flights scraper that uses Base64-encoded Protobuf to query flight data. Huge thanks to [@AWeirdDev](https://github.com/AWeirdDev) for the original work and clever reverse-engineering! 🙏
 
 **This fork adds:**
-- 🤖 AI agent-friendly API with structured JSON responses
-- 📦 Pydantic models for validation & serialization  
-- 🔧 MCP (Model Context Protocol) server support
-- 🛡️ Structured error handling with recovery suggestions
-- 📚 Comprehensive documentation
+- 🤖 **AI Agent API** - Structured JSON responses for LLM function calling
+- 🦎 **OpenClaw Ready** - Works seamlessly with OpenClaw AI agents
+- 🔧 **MCP Server** - Model Context Protocol for Claude Desktop & AI assistants
+- 📦 **Pydantic Models** - Type-safe validation & serialization  
+- 🛡️ **Error Handling** - Structured errors with recovery suggestions
+- ⚡ **Reliability** - Retry logic, rate limiting, config management
+- 📚 **Documentation** - Comprehensive guides for AI integration
 
 ---
 
@@ -139,15 +147,24 @@ asyncio.run(main())
 
 ---
 
-## MCP Server (Claude Desktop / OpenClaw)
+## 🔧 MCP Server (Claude Desktop / OpenClaw)
 
-Use fast-flights as an MCP tool server for AI assistants.
+Use fast-flights as an MCP tool server for AI assistants like **Claude Desktop** and **OpenClaw**.
 
-### Quick Setup
+### 🦎 OpenClaw Setup
 
-```bash
-pip install fast-flights[mcp]
+```json
+{
+    "mcpServers": {
+        "fast-flights": {
+            "command": "python",
+            "args": ["-m", "fast_flights.mcp_server"]
+        }
+    }
+}
 ```
+
+### 🤖 Claude Desktop Setup
 
 Add to Claude Desktop config (`claude_desktop_config.json`):
 
@@ -162,10 +179,12 @@ Add to Claude Desktop config (`claude_desktop_config.json`):
 }
 ```
 
-**Available Tools:**
-- `search_flights` - Search flights with prices, times, stops
-- `search_airport` - Find airport codes by city name
-- `compare_flight_dates` - Compare prices across dates
+**Available MCP Tools:**
+| Tool | Description |
+|------|-------------|
+| `search_flights` | Search flights with prices, times, stops |
+| `search_airport` | Find airport codes by city name |
+| `compare_flight_dates` | Compare prices across multiple dates |
 
 See [MCP Documentation](docs/mcp.md) for full details.
 

@@ -1,6 +1,10 @@
-site_name: Flights
-site_url: https://github.com/AWeirdDev/flights
-repo_url: https://github.com/AWeirdDev/flights
+site_name: flights_OpenClaw
+site_description: AI-agent-ready Google Flights scraper for Python. MCP server for Claude Desktop & OpenClaw. Fast, reliable flight data for LLM tools.
+site_author: laikhtman
+site_url: https://github.com/laikhtman/flights_OpenClaw
+repo_url: https://github.com/laikhtman/flights_OpenClaw
+repo_name: flights_OpenClaw
+edit_uri: edit/main/docs/
 theme:
   name: material
   icon:
@@ -22,6 +26,11 @@ theme:
   features:
     - content.code.copy
     - content.code.annotate
+    - navigation.instant
+    - navigation.sections
+    - navigation.top
+    - search.highlight
+    - search.share
 plugins:
   - search
   - offline
@@ -35,12 +44,23 @@ plugins:
         - locale: zh-TW
           name: 繁體中文
           build: true
+nav:
+  - Home: index.md
+  - 🤖 MCP Server: mcp.md
+  - 🤖 AI Integration Guide: AI_AGENT_INTEGRATION.md
+  - ✈️ Airports: airports.md
+  - 🎯 Filters: filters.md
+  - 🔄 Fallbacks: fallbacks.md
+  - 🖥️ Local Playwright: local.md
 extra:
   generator: false
   social:
     - icon: fontawesome/brands/github
-      link: https://github.com/AWeirdDev
-      name: AWeirdDev on GitHub
+      link: https://github.com/laikhtman/flights_OpenClaw
+      name: flights_OpenClaw on GitHub
+    - icon: fontawesome/brands/python
+      link: https://pypi.org/project/fast-flights/
+      name: PyPI Package
   alternate:
     - name: English
       link: /
@@ -48,7 +68,7 @@ extra:
     - name: 繁體中文
       link: /zh-tw/
       lang: zh-TW
-copyright: "&copy; 2024 AWeirdDev" 
+copyright: "&copy; 2024-2026 laikhtman | Original by AWeirdDev" 
 markdown_extensions:
   - attr_list
   - pymdownx.emoji:

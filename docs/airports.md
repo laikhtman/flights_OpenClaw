@@ -1,4 +1,4 @@
-# Airports
+# ✈️ Airports
 
 To search for an airport, you could use the `search_airports()` API:
 

@@ -1,22 +1,30 @@
 # ✈️ flights_OpenClaw
 
-A fast, AI-agent-ready Google Flights scraper for Python.
+**AI-Agent-Ready Google Flights Scraper for Python**
+
+*Built for [OpenClaw](https://openclaw.io) and AI Agents*
+
+[![MCP Compatible](https://img.shields.io/badge/MCP-Compatible-purple.svg)](https://modelcontextprotocol.io)
+[![OpenClaw Ready](https://img.shields.io/badge/OpenClaw-Ready-orange.svg)](https://openclaw.io)
 
 ---
 
-## Overview
+## 🤖 Overview
 
 **flights_OpenClaw** is a fork of [fast-flights](https://github.com/AWeirdDev/flights) enhanced for AI agent integration. It scrapes Google Flights using Base64-encoded Protobuf queries and returns structured, validated responses perfect for LLM applications.
 
 ### Why this fork?
 
-| Feature | Original | This Fork |
+| Feature | Original | 🦎 This Fork |
 |---------|----------|-----------|
 | JSON Output | Manual | Built-in `model_dump()` |
 | Error Handling | Exceptions | Structured responses |
 | Schema Validation | None | Pydantic models |
-| MCP Support | None | Full MCP server |
+| MCP Support | None | ✅ Full MCP server |
+| OpenClaw Ready | None | ✅ Native support |
 | Agent API | None | `search_flights()` |
+| Async Support | None | ✅ `search_flights_async()` |
+| Reliability | Basic | Retry, rate limiting |
 
 ---
 
