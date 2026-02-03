@@ -320,6 +320,182 @@ List all price alerts.
 
 ---
 
+## �️ Flexible Date Search Tools
+
+### 📅 `search_flexible_dates`
+
+Search for flights with flexible departure dates (+/- N days).
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `origin` | string | ✅ | Origin airport IATA code |
+| `destination` | string | ✅ | Destination airport IATA code |
+| `departure_date` | string | ✅ | Center date (YYYY-MM-DD) |
+| `days_before` | integer | ❌ | Days before center (default: 3) |
+| `days_after` | integer | ❌ | Days after center (default: 3) |
+| `return_date` | string | ❌ | Return date for round-trip |
+| `seat_class` | string | ❌ | Seat class (default: "economy") |
+
+**Example Response:**
+
+```json
+{
+    "route": "JFK → LAX",
+    "base_date": "2025-06-15",
+    "dates_searched": 7,
+    "recommendation": "Fly on 2025-06-17 (Tuesday) to save $50 compared to 2025-06-14",
+    "cheapest_date": {
+        "date": "2025-06-17",
+        "price": 249.0,
+        "day_of_week": "Tuesday",
+        "is_weekend": false
+    },
+    "average_price": 289.0
+}
+```
+
+---
+
+### 🗓️ `search_weekend_flights`
+
+Search for weekend-only flights.
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `origin` | string | ✅ | Origin airport IATA code |
+| `destination` | string | ✅ | Destination airport IATA code |
+| `start_date` | string | ✅ | Start searching from (YYYY-MM-DD) |
+| `num_weekends` | integer | ❌ | Weekends to search (default: 4) |
+| `seat_class` | string | ❌ | Seat class (default: "economy") |
+
+**Example Response:**
+
+```json
+{
+    "route": "JFK → LAX",
+    "weekends_searched": 4,
+    "recommendation": "Best price found: 2025-06-21 at $279",
+    "cheapest_weekend": {
+        "date": "2025-06-21",
+        "price": 279.0,
+        "day_of_week": "Saturday"
+    },
+    "average_price": 315.0
+}
+```
+
+---
+
+### 📆 `search_weekday_flights`
+
+Search for flights on specific weekdays (often cheaper mid-week).
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `origin` | string | ✅ | Origin airport IATA code |
+| `destination` | string | ✅ | Destination airport IATA code |
+| `start_date` | string | ✅ | Start date (YYYY-MM-DD) |
+| `weekdays` | array | ✅ | Days to search ("tuesday", "wednesday", etc.) |
+| `num_weeks` | integer | ❌ | Weeks to search (default: 4) |
+| `seat_class` | string | ❌ | Seat class (default: "economy") |
+
+**Example Response:**
+
+```json
+{
+    "route": "JFK → LAX",
+    "weekdays_searched": ["tuesday", "wednesday"],
+    "weeks_covered": 4,
+    "recommendation": "Fly on 2025-06-17 (Tuesday) to save $80",
+    "cheapest_day": {
+        "date": "2025-06-17",
+        "price": 219.0,
+        "day_of_week": "Tuesday"
+    },
+    "average_price": 259.0
+}
+```
+
+---
+
+### 🗓️ `get_calendar_heatmap`
+
+Get monthly calendar with price heatmap data.
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `origin` | string | ✅ | Origin airport IATA code |
+| `destination` | string | ✅ | Destination airport IATA code |
+| `year` | integer | ✅ | Year (e.g., 2025) |
+| `month` | integer | ✅ | Month (1-12) |
+| `seat_class` | string | ❌ | Seat class (default: "economy") |
+| `sample_days` | array | ❌ | Specific days to check (for speed) |
+
+**Example Response:**
+
+```json
+{
+    "route": "JFK → LAX",
+    "month": "June 2025",
+    "cheapest_day": {
+        "date": "2025-06-17",
+        "price": 219.0,
+        "day_of_week": "Tuesday"
+    },
+    "cheapest_week": 3,
+    "price_range": {"min": 219.0, "max": 450.0},
+    "days": [
+        {"date": "2025-06-01", "price": 289.0, "day_of_week": "Sunday", "is_weekend": true},
+        {"date": "2025-06-02", "price": 249.0, "day_of_week": "Monday", "is_weekend": false}
+    ]
+}
+```
+
+---
+
+### 💡 `suggest_best_dates`
+
+Get smart suggestions for optimal travel dates.
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `origin` | string | ✅ | Origin airport IATA code |
+| `destination` | string | ✅ | Destination airport IATA code |
+| `preferred_date` | string | ✅ | Preferred date (YYYY-MM-DD) |
+| `flexibility_days` | integer | ❌ | Flexible range (default: 7) |
+| `prefer_weekends` | boolean | ❌ | Only weekend suggestions |
+| `avoid_weekends` | boolean | ❌ | Exclude weekends |
+| `max_results` | integer | ❌ | Max suggestions (default: 5) |
+
+**Example Response:**
+
+```json
+{
+    "route": "JFK → LAX",
+    "preferred_date": "2025-06-15",
+    "flexibility": "+/- 7 days",
+    "recommendation": "Best date: 2025-06-17 (Tuesday) at $219 - Save $150 vs worst date!",
+    "suggestions": [
+        {"rank": 1, "date": "2025-06-17", "day_of_week": "Tuesday", "price": 219.0},
+        {"rank": 2, "date": "2025-06-18", "day_of_week": "Wednesday", "price": 229.0},
+        {"rank": 3, "date": "2025-06-10", "day_of_week": "Tuesday", "price": 239.0}
+    ],
+    "average_price": 285.0
+}
+```
+
+---
+
 ## �🔧 Troubleshooting
 
 ### "MCP package not installed"

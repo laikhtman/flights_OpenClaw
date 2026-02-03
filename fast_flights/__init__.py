@@ -141,6 +141,38 @@ except ImportError:
     get_price_tracker = None  # type: ignore
     reset_price_tracker = None  # type: ignore
 
+# Flexible Date Search API (optional - requires agent API)
+try:
+    from .flexible_dates import (
+        DatePrice,
+        FlexibleSearchResult,
+        CalendarHeatmap,
+        search_flexible_dates,
+        search_weekend_flights,
+        search_weekday_flights,
+        get_calendar_heatmap,
+        suggest_best_dates,
+        generate_date_range,
+        generate_weekend_dates,
+        generate_weekday_dates,
+        generate_month_dates,
+    )
+    _FLEX_DATES_AVAILABLE = True
+except ImportError:
+    _FLEX_DATES_AVAILABLE = False
+    DatePrice = None  # type: ignore
+    FlexibleSearchResult = None  # type: ignore
+    CalendarHeatmap = None  # type: ignore
+    search_flexible_dates = None  # type: ignore
+    search_weekend_flights = None  # type: ignore
+    search_weekday_flights = None  # type: ignore
+    get_calendar_heatmap = None  # type: ignore
+    suggest_best_dates = None  # type: ignore
+    generate_date_range = None  # type: ignore
+    generate_weekend_dates = None  # type: ignore
+    generate_weekday_dates = None  # type: ignore
+    generate_month_dates = None  # type: ignore
+
 __all__ = [
     # Core API
     "Airport",
@@ -215,6 +247,19 @@ __all__ = [
     "EmailAlertHandler",
     "get_price_tracker",
     "reset_price_tracker",
+    # Flexible Date Search API (requires pydantic)
+    "DatePrice",
+    "FlexibleSearchResult",
+    "CalendarHeatmap",
+    "search_flexible_dates",
+    "search_weekend_flights",
+    "search_weekday_flights",
+    "get_calendar_heatmap",
+    "suggest_best_dates",
+    "generate_date_range",
+    "generate_weekend_dates",
+    "generate_weekday_dates",
+    "generate_month_dates",
 ]
 
 # Backwards-compatible name: try to resolve Cookies lazily if accessed

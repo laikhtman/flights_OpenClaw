@@ -294,19 +294,25 @@ pip install fast-flights[all]
   - [x] `get_tracked_routes` - List tracked routes
   - [x] `get_price_alerts` - List price alerts
 
-### 🗓️ Phase 6: Flexible Date Search
-- [ ] **Date range queries**
-  - [ ] `+/- N days` parameter for searches
-  - [ ] Weekend-only search option
-  - [ ] Specific weekday filtering
-- [ ] **Calendar view data**
-  - [ ] Monthly price heatmap data
-  - [ ] Cheapest day per week
-  - [ ] Price trend indicators
-- [ ] **Smart suggestions**
-  - [ ] "Cheapest nearby dates" feature
-  - [ ] Flexible departure + return combinations
-  - [ ] Holiday/peak season awareness
+### 🗓️ Phase 6: Flexible Date Search ✅
+- [x] **Date range queries**
+  - [x] `+/- N days` parameter for searches
+  - [x] Weekend-only search option
+  - [x] Specific weekday filtering
+- [x] **Calendar view data**
+  - [x] Monthly price heatmap data
+  - [x] Cheapest day per week
+  - [x] Price trend indicators
+- [x] **Smart suggestions**
+  - [x] "Cheapest nearby dates" feature
+  - [x] Flexible departure + return combinations
+  - [x] Weekend/weekday preference options
+- [x] **MCP tools**
+  - [x] `search_flexible_dates` - +/- N days search
+  - [x] `search_weekend_flights` - Weekend-only flights
+  - [x] `search_weekday_flights` - Specific weekday search
+  - [x] `get_calendar_heatmap` - Monthly price heatmap
+  - [x] `suggest_best_dates` - Smart date suggestions
 
 ### ✈️ Phase 7: Airline Filtering
 - [ ] **Airline preferences**

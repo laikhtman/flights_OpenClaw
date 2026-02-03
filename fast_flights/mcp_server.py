@@ -56,6 +56,19 @@ try:
 except ImportError:
     PRICE_TRACKING_AVAILABLE = False
 
+# Import flexible dates
+try:
+    from .flexible_dates import (
+        search_flexible_dates,
+        search_weekend_flights,
+        search_weekday_flights,
+        get_calendar_heatmap,
+        suggest_best_dates,
+    )
+    FLEX_DATES_AVAILABLE = True
+except ImportError:
+    FLEX_DATES_AVAILABLE = False
+
 logger = logging.getLogger(__name__)
 
 # Tool definitions
@@ -389,6 +402,311 @@ Use this tool to see what price alerts are configured.""",
     }
 )
 
+# Flexible Date Search Tools
+SEARCH_FLEXIBLE_DATES_TOOL = Tool(
+    name="search_flexible_dates",
+    description="""Search for flights with flexible departure dates.
+
+Use this tool to find the cheapest days to fly within a date range.
+Searches +/- N days around your preferred date and returns price comparisons.
+
+Example: Find the cheapest day to fly JFK to LAX within 3 days of 2025-06-15.""",
+    inputSchema={
+        "type": "object",
+        "properties": {
+            "origin": {
+                "type": "string",
+                "description": "Origin airport IATA code",
+                "minLength": 3,
+                "maxLength": 4
+            },
+            "destination": {
+                "type": "string",
+                "description": "Destination airport IATA code",
+                "minLength": 3,
+                "maxLength": 4
+            },
+            "departure_date": {
+                "type": "string",
+                "description": "Center date for the search (YYYY-MM-DD)",
+                "pattern": r"^\d{4}-\d{2}-\d{2}$"
+            },
+            "days_before": {
+                "type": "integer",
+                "description": "Days before the center date to search",
+                "default": 3,
+                "minimum": 0,
+                "maximum": 7
+            },
+            "days_after": {
+                "type": "integer",
+                "description": "Days after the center date to search",
+                "default": 3,
+                "minimum": 0,
+                "maximum": 7
+            },
+            "return_date": {
+                "type": "string",
+                "description": "Return date for round-trip (YYYY-MM-DD)",
+                "pattern": r"^\d{4}-\d{2}-\d{2}$"
+            },
+            "seat_class": {
+                "type": "string",
+                "enum": ["economy", "premium-economy", "business", "first"],
+                "default": "economy"
+            },
+            "adults": {
+                "type": "integer",
+                "description": "Number of adult passengers",
+                "default": 1,
+                "minimum": 1,
+                "maximum": 9
+            }
+        },
+        "required": ["origin", "destination", "departure_date"]
+    }
+)
+
+SEARCH_WEEKEND_FLIGHTS_TOOL = Tool(
+    name="search_weekend_flights",
+    description="""Search for flights on weekends only.
+
+Use this tool to find weekend flight prices for the next few weeks.
+Returns Saturday and Sunday flight options with prices.
+
+Example: Find weekend flights from NYC to LA for the next 4 weekends.""",
+    inputSchema={
+        "type": "object",
+        "properties": {
+            "origin": {
+                "type": "string",
+                "description": "Origin airport IATA code",
+                "minLength": 3,
+                "maxLength": 4
+            },
+            "destination": {
+                "type": "string",
+                "description": "Destination airport IATA code",
+                "minLength": 3,
+                "maxLength": 4
+            },
+            "start_date": {
+                "type": "string",
+                "description": "Start searching from this date (YYYY-MM-DD)",
+                "pattern": r"^\d{4}-\d{2}-\d{2}$"
+            },
+            "num_weekends": {
+                "type": "integer",
+                "description": "Number of weekends to search",
+                "default": 4,
+                "minimum": 1,
+                "maximum": 8
+            },
+            "seat_class": {
+                "type": "string",
+                "enum": ["economy", "premium-economy", "business", "first"],
+                "default": "economy"
+            },
+            "adults": {
+                "type": "integer",
+                "description": "Number of adult passengers",
+                "default": 1,
+                "minimum": 1,
+                "maximum": 9
+            }
+        },
+        "required": ["origin", "destination", "start_date"]
+    }
+)
+
+SEARCH_WEEKDAY_FLIGHTS_TOOL = Tool(
+    name="search_weekday_flights",
+    description="""Search for flights on specific weekdays.
+
+Use this tool when the user prefers certain days (e.g., Tuesdays/Wednesdays).
+Often mid-week flights are cheaper than weekend flights.
+
+Example: Find Tuesday flights from JFK to LAX for the next 4 weeks.""",
+    inputSchema={
+        "type": "object",
+        "properties": {
+            "origin": {
+                "type": "string",
+                "description": "Origin airport IATA code",
+                "minLength": 3,
+                "maxLength": 4
+            },
+            "destination": {
+                "type": "string",
+                "description": "Destination airport IATA code",
+                "minLength": 3,
+                "maxLength": 4
+            },
+            "start_date": {
+                "type": "string",
+                "description": "Start searching from this date (YYYY-MM-DD)",
+                "pattern": r"^\d{4}-\d{2}-\d{2}$"
+            },
+            "weekdays": {
+                "type": "array",
+                "items": {
+                    "type": "string",
+                    "enum": ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]
+                },
+                "description": "Days of the week to search",
+                "minItems": 1,
+                "maxItems": 7
+            },
+            "num_weeks": {
+                "type": "integer",
+                "description": "Number of weeks to search",
+                "default": 4,
+                "minimum": 1,
+                "maximum": 8
+            },
+            "seat_class": {
+                "type": "string",
+                "enum": ["economy", "premium-economy", "business", "first"],
+                "default": "economy"
+            },
+            "adults": {
+                "type": "integer",
+                "description": "Number of adult passengers",
+                "default": 1,
+                "minimum": 1,
+                "maximum": 9
+            }
+        },
+        "required": ["origin", "destination", "start_date", "weekdays"]
+    }
+)
+
+GET_CALENDAR_HEATMAP_TOOL = Tool(
+    name="get_calendar_heatmap",
+    description="""Get a monthly calendar of flight prices.
+
+Use this tool to see price trends across an entire month.
+Returns prices for each day with the cheapest day highlighted.
+
+Example: Show me flight prices for JFK to LAX in June 2025.""",
+    inputSchema={
+        "type": "object",
+        "properties": {
+            "origin": {
+                "type": "string",
+                "description": "Origin airport IATA code",
+                "minLength": 3,
+                "maxLength": 4
+            },
+            "destination": {
+                "type": "string",
+                "description": "Destination airport IATA code",
+                "minLength": 3,
+                "maxLength": 4
+            },
+            "year": {
+                "type": "integer",
+                "description": "Year (e.g., 2025)",
+                "minimum": 2024,
+                "maximum": 2026
+            },
+            "month": {
+                "type": "integer",
+                "description": "Month (1-12)",
+                "minimum": 1,
+                "maximum": 12
+            },
+            "seat_class": {
+                "type": "string",
+                "enum": ["economy", "premium-economy", "business", "first"],
+                "default": "economy"
+            },
+            "adults": {
+                "type": "integer",
+                "description": "Number of adult passengers",
+                "default": 1,
+                "minimum": 1,
+                "maximum": 9
+            },
+            "sample_days": {
+                "type": "array",
+                "items": {"type": "integer", "minimum": 1, "maximum": 31},
+                "description": "Sample specific days only (for faster results). Omit to check all days."
+            }
+        },
+        "required": ["origin", "destination", "year", "month"]
+    }
+)
+
+SUGGEST_BEST_DATES_TOOL = Tool(
+    name="suggest_best_dates",
+    description="""Get smart suggestions for the best dates to fly.
+
+Use this tool to find optimal travel dates based on preferences.
+Considers price, weekends vs weekdays, and flexibility.
+
+Example: Find the best dates to fly around June 15th with 5 days flexibility.""",
+    inputSchema={
+        "type": "object",
+        "properties": {
+            "origin": {
+                "type": "string",
+                "description": "Origin airport IATA code",
+                "minLength": 3,
+                "maxLength": 4
+            },
+            "destination": {
+                "type": "string",
+                "description": "Destination airport IATA code",
+                "minLength": 3,
+                "maxLength": 4
+            },
+            "preferred_date": {
+                "type": "string",
+                "description": "Preferred departure date (YYYY-MM-DD)",
+                "pattern": r"^\d{4}-\d{2}-\d{2}$"
+            },
+            "flexibility_days": {
+                "type": "integer",
+                "description": "How flexible (+/- days from preferred)",
+                "default": 7,
+                "minimum": 1,
+                "maximum": 14
+            },
+            "prefer_weekends": {
+                "type": "boolean",
+                "description": "Only suggest weekend dates",
+                "default": False
+            },
+            "avoid_weekends": {
+                "type": "boolean",
+                "description": "Exclude weekend dates from suggestions",
+                "default": False
+            },
+            "max_results": {
+                "type": "integer",
+                "description": "Maximum suggestions to return",
+                "default": 5,
+                "minimum": 1,
+                "maximum": 10
+            },
+            "seat_class": {
+                "type": "string",
+                "enum": ["economy", "premium-economy", "business", "first"],
+                "default": "economy"
+            },
+            "adults": {
+                "type": "integer",
+                "description": "Number of adult passengers",
+                "default": 1,
+                "minimum": 1,
+                "maximum": 9
+            }
+        },
+        "required": ["origin", "destination", "preferred_date"]
+    }
+)
+
 
 def create_mcp_server() -> "Server":
     """
@@ -431,6 +749,16 @@ def create_mcp_server() -> "Server":
                 GET_PRICE_ALERTS_TOOL,
             ])
         
+        # Add flexible date tools if available
+        if FLEX_DATES_AVAILABLE:
+            tools.extend([
+                SEARCH_FLEXIBLE_DATES_TOOL,
+                SEARCH_WEEKEND_FLIGHTS_TOOL,
+                SEARCH_WEEKDAY_FLIGHTS_TOOL,
+                GET_CALENDAR_HEATMAP_TOOL,
+                SUGGEST_BEST_DATES_TOOL,
+            ])
+        
         return tools
     
     @server.call_tool()
@@ -455,6 +783,16 @@ def create_mcp_server() -> "Server":
                 return await _handle_get_tracked_routes(arguments)
             elif name == "get_price_alerts":
                 return await _handle_get_price_alerts(arguments)
+            elif name == "search_flexible_dates":
+                return await _handle_search_flexible_dates(arguments)
+            elif name == "search_weekend_flights":
+                return await _handle_search_weekend_flights(arguments)
+            elif name == "search_weekday_flights":
+                return await _handle_search_weekday_flights(arguments)
+            elif name == "get_calendar_heatmap":
+                return await _handle_get_calendar_heatmap(arguments)
+            elif name == "suggest_best_dates":
+                return await _handle_suggest_best_dates(arguments)
             else:
                 return [TextContent(
                     type="text",
@@ -737,6 +1075,193 @@ async def _handle_get_price_alerts(arguments: dict[str, Any]) -> Sequence[TextCo
                 }
                 for a in alerts
             ],
+        }, indent=2)
+    )]
+
+
+# Flexible Date Search Handlers
+
+async def _handle_search_flexible_dates(arguments: dict[str, Any]) -> Sequence[TextContent]:
+    """Handle the search_flexible_dates tool call."""
+    if not FLEX_DATES_AVAILABLE:
+        return [TextContent(
+            type="text",
+            text=json.dumps({
+                "error": "Flexible dates module not available",
+                "suggestion": "Install with: pip install fast-flights[agent]"
+            }, indent=2)
+        )]
+    
+    result = search_flexible_dates(
+        origin=arguments["origin"],
+        destination=arguments["destination"],
+        departure_date=arguments["departure_date"],
+        days_before=arguments.get("days_before", 3),
+        days_after=arguments.get("days_after", 3),
+        return_date=arguments.get("return_date"),
+        seat_class=arguments.get("seat_class", "economy"),
+        adults=arguments.get("adults", 1),
+    )
+    
+    return [TextContent(
+        type="text",
+        text=json.dumps({
+            "route": f"{result.origin} → {result.destination}",
+            "base_date": result.base_date,
+            "dates_searched": result.dates_searched,
+            "recommendation": result.recommendation,
+            "cheapest_date": result.cheapest_date.to_dict() if result.cheapest_date else None,
+            "most_expensive_date": result.most_expensive_date.to_dict() if result.most_expensive_date else None,
+            "average_price": result.average_price,
+            "all_dates": [r.to_dict() for r in result.results],
+        }, indent=2)
+    )]
+
+
+async def _handle_search_weekend_flights(arguments: dict[str, Any]) -> Sequence[TextContent]:
+    """Handle the search_weekend_flights tool call."""
+    if not FLEX_DATES_AVAILABLE:
+        return [TextContent(
+            type="text",
+            text=json.dumps({
+                "error": "Flexible dates module not available",
+                "suggestion": "Install with: pip install fast-flights[agent]"
+            }, indent=2)
+        )]
+    
+    result = search_weekend_flights(
+        origin=arguments["origin"],
+        destination=arguments["destination"],
+        start_date=arguments["start_date"],
+        num_weekends=arguments.get("num_weekends", 4),
+        seat_class=arguments.get("seat_class", "economy"),
+        adults=arguments.get("adults", 1),
+    )
+    
+    return [TextContent(
+        type="text",
+        text=json.dumps({
+            "route": f"{result.origin} → {result.destination}",
+            "weekends_searched": result.dates_searched // 2,  # Approx weekends
+            "recommendation": result.recommendation,
+            "cheapest_weekend": result.cheapest_date.to_dict() if result.cheapest_date else None,
+            "average_price": result.average_price,
+            "weekend_dates": [r.to_dict() for r in result.results],
+        }, indent=2)
+    )]
+
+
+async def _handle_search_weekday_flights(arguments: dict[str, Any]) -> Sequence[TextContent]:
+    """Handle the search_weekday_flights tool call."""
+    if not FLEX_DATES_AVAILABLE:
+        return [TextContent(
+            type="text",
+            text=json.dumps({
+                "error": "Flexible dates module not available",
+                "suggestion": "Install with: pip install fast-flights[agent]"
+            }, indent=2)
+        )]
+    
+    result = search_weekday_flights(
+        origin=arguments["origin"],
+        destination=arguments["destination"],
+        start_date=arguments["start_date"],
+        weekdays=arguments["weekdays"],
+        num_weeks=arguments.get("num_weeks", 4),
+        seat_class=arguments.get("seat_class", "economy"),
+        adults=arguments.get("adults", 1),
+    )
+    
+    return [TextContent(
+        type="text",
+        text=json.dumps({
+            "route": f"{result.origin} → {result.destination}",
+            "weekdays_searched": arguments["weekdays"],
+            "weeks_covered": arguments.get("num_weeks", 4),
+            "recommendation": result.recommendation,
+            "cheapest_day": result.cheapest_date.to_dict() if result.cheapest_date else None,
+            "average_price": result.average_price,
+            "dates": [r.to_dict() for r in result.results],
+        }, indent=2)
+    )]
+
+
+async def _handle_get_calendar_heatmap(arguments: dict[str, Any]) -> Sequence[TextContent]:
+    """Handle the get_calendar_heatmap tool call."""
+    if not FLEX_DATES_AVAILABLE:
+        return [TextContent(
+            type="text",
+            text=json.dumps({
+                "error": "Flexible dates module not available",
+                "suggestion": "Install with: pip install fast-flights[agent]"
+            }, indent=2)
+        )]
+    
+    heatmap = get_calendar_heatmap(
+        origin=arguments["origin"],
+        destination=arguments["destination"],
+        year=arguments["year"],
+        month=arguments["month"],
+        seat_class=arguments.get("seat_class", "economy"),
+        adults=arguments.get("adults", 1),
+        sample_days=arguments.get("sample_days"),
+    )
+    
+    return [TextContent(
+        type="text",
+        text=json.dumps({
+            "route": f"{heatmap.origin} → {heatmap.destination}",
+            "month": f"{heatmap.month_name} {heatmap.year}",
+            "cheapest_day": heatmap.cheapest_day.to_dict() if heatmap.cheapest_day else None,
+            "cheapest_week": heatmap.cheapest_week,
+            "price_range": heatmap.price_range,
+            "days": [d.to_dict() for d in heatmap.days],
+        }, indent=2)
+    )]
+
+
+async def _handle_suggest_best_dates(arguments: dict[str, Any]) -> Sequence[TextContent]:
+    """Handle the suggest_best_dates tool call."""
+    if not FLEX_DATES_AVAILABLE:
+        return [TextContent(
+            type="text",
+            text=json.dumps({
+                "error": "Flexible dates module not available",
+                "suggestion": "Install with: pip install fast-flights[agent]"
+            }, indent=2)
+        )]
+    
+    result = suggest_best_dates(
+        origin=arguments["origin"],
+        destination=arguments["destination"],
+        preferred_date=arguments["preferred_date"],
+        flexibility_days=arguments.get("flexibility_days", 7),
+        prefer_weekends=arguments.get("prefer_weekends", False),
+        avoid_weekends=arguments.get("avoid_weekends", False),
+        max_results=arguments.get("max_results", 5),
+        seat_class=arguments.get("seat_class", "economy"),
+        adults=arguments.get("adults", 1),
+    )
+    
+    return [TextContent(
+        type="text",
+        text=json.dumps({
+            "route": f"{result.origin} → {result.destination}",
+            "preferred_date": arguments["preferred_date"],
+            "flexibility": f"+/- {arguments.get('flexibility_days', 7)} days",
+            "recommendation": result.recommendation,
+            "suggestions": [
+                {
+                    "rank": i + 1,
+                    "date": r.date,
+                    "day_of_week": r.day_of_week,
+                    "price": r.price,
+                    "is_weekend": r.is_weekend,
+                    "airline": r.airline,
+                }
+                for i, r in enumerate(result.results)
+            ],
+            "average_price": result.average_price,
         }, indent=2)
     )]
 
