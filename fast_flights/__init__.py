@@ -105,6 +105,42 @@ except ImportError:
     get_executor = None  # type: ignore
     shutdown_executor = None  # type: ignore
 
+# Price Tracking API (optional - requires pydantic)
+try:
+    from .price_storage import (
+        PriceRecord,
+        PriceAlert,
+        TrackedRoute,
+        PriceStorageBackend,
+        SQLitePriceStorage,
+        get_price_storage,
+        reset_price_storage,
+    )
+    from .price_tracker import (
+        PriceTracker,
+        PriceChange,
+        WebhookAlertHandler,
+        EmailAlertHandler,
+        get_price_tracker,
+        reset_price_tracker,
+    )
+    _PRICE_TRACKING_AVAILABLE = True
+except ImportError:
+    _PRICE_TRACKING_AVAILABLE = False
+    PriceRecord = None  # type: ignore
+    PriceAlert = None  # type: ignore
+    TrackedRoute = None  # type: ignore
+    PriceStorageBackend = None  # type: ignore
+    SQLitePriceStorage = None  # type: ignore
+    get_price_storage = None  # type: ignore
+    reset_price_storage = None  # type: ignore
+    PriceTracker = None  # type: ignore
+    PriceChange = None  # type: ignore
+    WebhookAlertHandler = None  # type: ignore
+    EmailAlertHandler = None  # type: ignore
+    get_price_tracker = None  # type: ignore
+    reset_price_tracker = None  # type: ignore
+
 __all__ = [
     # Core API
     "Airport",
@@ -165,6 +201,20 @@ __all__ = [
     "run_in_executor",
     "get_executor",
     "shutdown_executor",
+    # Price Tracking API (requires pydantic)
+    "PriceRecord",
+    "PriceAlert",
+    "TrackedRoute",
+    "PriceStorageBackend",
+    "SQLitePriceStorage",
+    "get_price_storage",
+    "reset_price_storage",
+    "PriceTracker",
+    "PriceChange",
+    "WebhookAlertHandler",
+    "EmailAlertHandler",
+    "get_price_tracker",
+    "reset_price_tracker",
 ]
 
 # Backwards-compatible name: try to resolve Cookies lazily if accessed

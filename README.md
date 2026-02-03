@@ -185,8 +185,58 @@ Add to Claude Desktop config (`claude_desktop_config.json`):
 | `search_flights` | Search flights with prices, times, stops |
 | `search_airport` | Find airport codes by city name |
 | `compare_flight_dates` | Compare prices across multiple dates |
+| `track_price` | Start tracking a route for price changes |
+| `get_price_history` | Get historical prices for a route |
+| `set_price_alert` | Set alert when price drops below target |
 
 See [MCP Documentation](docs/mcp.md) for full details.
+
+---
+
+## 📊 Price Tracking
+
+Track prices over time and get notified when they drop.
+
+### Start Tracking
+
+```python
+from fast_flights import get_price_tracker
+
+tracker = get_price_tracker()
+
+# Track a route
+route_id = tracker.track_route(
+    origin="JFK",
+    destination="LAX",
+    departure_date="2025-06-15",
+    check_interval_minutes=30,  # Check every 30 min
+)
+
+# Set a price alert with Discord webhook
+alert_id = tracker.set_alert(
+    origin="JFK",
+    destination="LAX",
+    departure_date="2025-06-15",
+    target_price=250,  # Alert when <= $250
+    webhook_url="https://discord.com/api/webhooks/...",
+)
+
+# Start background monitoring
+tracker.start()
+```
+
+### Get Price History
+
+```python
+# View price history
+history = tracker.get_price_history("JFK", "LAX", departure_date="2025-06-15")
+for record in history:
+    print(f"{record.recorded_at}: ${record.price} ({record.price_level})")
+
+# Get statistics
+stats = tracker.get_price_stats("JFK", "LAX", departure_date="2025-06-15", days=7)
+print(f"Min: ${stats['min_price']}, Max: ${stats['max_price']}, Avg: ${stats['avg_price']}")
+```
 
 ---
 
@@ -225,23 +275,24 @@ pip install fast-flights[all]
 
 ## Roadmap
 
-### 🎯 Phase 5: Price Tracking & Alerts
-- [ ] **Price history storage**
-  - [ ] SQLite backend for local storage
-  - [ ] Optional Redis/PostgreSQL for production
-  - [ ] Schema for route + date + price + timestamp
-- [ ] **Price monitoring**
-  - [ ] Background scheduler (APScheduler)
-  - [ ] Configurable check intervals
-  - [ ] Price change detection algorithms
-- [ ] **Alert system**
-  - [ ] Webhook notifications (Discord, Slack)
-  - [ ] Email alerts via SMTP
-  - [ ] Price threshold triggers (e.g., "alert when < $300")
-- [ ] **MCP tools**
-  - [ ] `track_price` - Start tracking a route
-  - [ ] `get_price_history` - Retrieve historical prices
-  - [ ] `set_price_alert` - Configure alert thresholds
+### ✅ Phase 5: Price Tracking & Alerts (Complete)
+- [x] **Price history storage**
+  - [x] SQLite backend for local storage
+  - [x] Schema for route + date + price + timestamp
+- [x] **Price monitoring**
+  - [x] Background scheduler with threading
+  - [x] Configurable check intervals
+  - [x] Price change detection
+- [x] **Alert system**
+  - [x] Webhook notifications (Discord, Slack)
+  - [x] Email alerts via SMTP
+  - [x] Price threshold triggers
+- [x] **MCP tools**
+  - [x] `track_price` - Start tracking a route
+  - [x] `get_price_history` - Retrieve historical prices
+  - [x] `set_price_alert` - Configure alert thresholds
+  - [x] `get_tracked_routes` - List tracked routes
+  - [x] `get_price_alerts` - List price alerts
 
 ### 🗓️ Phase 6: Flexible Date Search
 - [ ] **Date range queries**

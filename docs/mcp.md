@@ -170,7 +170,157 @@ Compare prices across multiple dates.
 
 ---
 
-## 🔧 Troubleshooting
+## � Price Tracking Tools
+
+### 📈 `track_price`
+
+Start tracking a route for price changes.
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `origin` | string | ✅ | Origin airport IATA code |
+| `destination` | string | ✅ | Destination airport IATA code |
+| `departure_date` | string | ✅ | Date in YYYY-MM-DD format |
+| `return_date` | string | ❌ | Return date for round-trip |
+| `seat_class` | string | ❌ | Seat class (default: "economy") |
+| `check_interval_minutes` | integer | ❌ | Check frequency (default: 60) |
+
+**Example Response:**
+
+```json
+{
+    "status": "success",
+    "message": "Now tracking JFK → LAX",
+    "route_id": 1,
+    "departure_date": "2025-06-15",
+    "check_interval_minutes": 60,
+    "current_price": 299.0,
+    "price_level": "typical"
+}
+```
+
+---
+
+### 📜 `get_price_history`
+
+Get historical prices for a route.
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `origin` | string | ✅ | Origin airport IATA code |
+| `destination` | string | ✅ | Destination airport IATA code |
+| `departure_date` | string | ❌ | Specific date (omit for all) |
+| `days` | integer | ❌ | Days of history (default: 7) |
+
+**Example Response:**
+
+```json
+{
+    "route": "JFK → LAX",
+    "departure_date": "2025-06-15",
+    "days_analyzed": 7,
+    "statistics": {
+        "min_price": 249.0,
+        "max_price": 399.0,
+        "avg_price": 312.5,
+        "record_count": 24
+    },
+    "price_history": [
+        {"price": 289.0, "price_level": "typical", "airline": "Delta", "recorded_at": "2025-02-03T10:30:00"},
+        {"price": 299.0, "price_level": "typical", "airline": "United", "recorded_at": "2025-02-03T09:00:00"}
+    ],
+    "total_records": 24
+}
+```
+
+---
+
+### 🔔 `set_price_alert`
+
+Set an alert when price drops below target.
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `origin` | string | ✅ | Origin airport IATA code |
+| `destination` | string | ✅ | Destination airport IATA code |
+| `departure_date` | string | ✅ | Date in YYYY-MM-DD format |
+| `target_price` | number | ✅ | Alert when price ≤ this |
+| `webhook_url` | string | ❌ | Discord/Slack webhook URL |
+| `email` | string | ❌ | Email address (needs SMTP) |
+
+**Example Response:**
+
+```json
+{
+    "status": "success",
+    "message": "Alert set for JFK → LAX",
+    "alert_id": 1,
+    "target_price": 250,
+    "current_price": 299.0,
+    "will_trigger": false,
+    "notification_method": "webhook"
+}
+```
+
+---
+
+### 📋 `get_tracked_routes`
+
+List all tracked routes.
+
+**Example Response:**
+
+```json
+{
+    "total_routes": 2,
+    "routes": [
+        {
+            "id": 1,
+            "route": "JFK → LAX",
+            "departure_date": "2025-06-15",
+            "check_interval_minutes": 60,
+            "is_active": true,
+            "last_price": 299.0,
+            "last_checked": "2025-02-03T10:30:00"
+        }
+    ]
+}
+```
+
+---
+
+### 📋 `get_price_alerts`
+
+List all price alerts.
+
+**Example Response:**
+
+```json
+{
+    "total_alerts": 1,
+    "alerts": [
+        {
+            "id": 1,
+            "route": "JFK → LAX",
+            "departure_date": "2025-06-15",
+            "target_price": 250,
+            "is_active": true,
+            "has_webhook": true,
+            "triggered_at": null
+        }
+    ]
+}
+```
+
+---
+
+## �🔧 Troubleshooting
 
 ### "MCP package not installed"
 
