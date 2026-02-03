@@ -114,6 +114,38 @@ print(result.summary())
 
 ---
 
+## MCP Server (Claude Desktop / OpenClaw)
+
+Use fast-flights as an MCP tool server for AI assistants.
+
+### Quick Setup
+
+```bash
+pip install fast-flights[mcp]
+```
+
+Add to Claude Desktop config (`claude_desktop_config.json`):
+
+```json
+{
+    "mcpServers": {
+        "fast-flights": {
+            "command": "python",
+            "args": ["-m", "fast_flights.mcp_server"]
+        }
+    }
+}
+```
+
+**Available Tools:**
+- `search_flights` - Search flights with prices, times, stops
+- `search_airport` - Find airport codes by city name
+- `compare_flight_dates` - Compare prices across dates
+
+See [MCP Documentation](docs/mcp.md) for full details.
+
+---
+
 ## Fetch Modes
 
 | Mode | Speed | Reliability | Notes |
@@ -155,10 +187,10 @@ pip install fast-flights[all]
 - [x] Structured error handling with recovery suggestions
 - [x] Comprehensive docstrings and type hints
 
-### 🚧 Phase 2: MCP Server (In Progress)
-- [ ] MCP server implementation (`fast_flights.mcp_server`)
-- [ ] Tool definitions for flight search, airport lookup, date comparison
-- [ ] Configuration file for Claude Desktop / OpenClaw
+### ✅ Phase 2: MCP Server (Complete)
+- [x] MCP server implementation (`fast_flights.mcp_server`)
+- [x] Tool definitions for flight search, airport lookup, date comparison
+- [x] Configuration file for Claude Desktop / OpenClaw
 
 ### 📋 Phase 3: Reliability
 - [ ] Retry logic with exponential backoff
@@ -181,6 +213,7 @@ pip install fast-flights[all]
 ## Documentation
 
 - [AI Agent Integration Guide](docs/AI_AGENT_INTEGRATION.md)
+- [MCP Server Setup](docs/mcp.md)
 - [Filters & Options](docs/filters.md)
 - [Fallback Modes](docs/fallbacks.md)
 - [Airport Codes](docs/airports.md)

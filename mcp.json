@@ -1,0 +1,51 @@
+{
+    "name": "fast-flights",
+    "version": "1.0.0",
+    "description": "Google Flights search tools for AI agents. Search flights, find airports, and compare prices across dates.",
+    "author": "laikhtman",
+    "repository": "https://github.com/laikhtman/flights_OpenClaw",
+    "tools": [
+        {
+            "name": "search_flights",
+            "description": "Search for flights between airports with prices, times, and stops"
+        },
+        {
+            "name": "search_airport",
+            "description": "Find airport IATA codes by city or airport name"
+        },
+        {
+            "name": "compare_flight_dates",
+            "description": "Compare flight prices across multiple dates to find the cheapest"
+        }
+    ],
+    "installation": {
+        "pip": "pip install fast-flights[mcp]",
+        "command": "python -m fast_flights.mcp_server"
+    },
+    "configuration": {
+        "claude_desktop": {
+            "mcpServers": {
+                "fast-flights": {
+                    "command": "python",
+                    "args": ["-m", "fast_flights.mcp_server"]
+                }
+            }
+        },
+        "openclaw": {
+            "servers": [
+                {
+                    "name": "fast-flights",
+                    "type": "stdio",
+                    "command": "python",
+                    "args": ["-m", "fast_flights.mcp_server"]
+                }
+            ]
+        }
+    },
+    "environment_variables": {
+        "BRIGHT_DATA_API_KEY": {
+            "description": "Optional: Bright Data API key for more reliable scraping",
+            "required": false
+        }
+    }
+}

@@ -93,6 +93,14 @@ else:
 
     [:octicons-arrow-right-24: Agent Guide](AI_AGENT_INTEGRATION.md)
 
+-   :material-server:{ .lg .middle } **MCP Server**
+
+    ---
+
+    Run as an MCP server for Claude Desktop and other AI assistants.
+
+    [:octicons-arrow-right-24: MCP Setup](mcp.md)
+
 -   :material-filter:{ .lg .middle } **Filters & Options**
 
     ---
@@ -137,10 +145,10 @@ else:
 - Structured error handling
 - Comprehensive docstrings
 
-### 🚧 Phase 2: MCP Server
+### ✅ Phase 2: MCP Server (Complete)
 - MCP server implementation
-- Tool definitions
-- Configuration for Claude Desktop
+- Tool definitions for search, airports, date comparison
+- Configuration for Claude Desktop & OpenClaw
 
 ### 📋 Phase 3: Reliability
 - Retry logic with backoff
