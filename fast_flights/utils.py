@@ -9,7 +9,6 @@ from __future__ import annotations
 
 import re
 import logging
-from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -92,48 +91,6 @@ def format_time(hour: int, minute: int) -> str:
     return f"{hour:02d}:{minute:02d}"
 
 
-def safe_get(obj: Any, *attrs: str, default: Any = None) -> Any:
-    """
-    Safely get nested attributes from an object.
-    
-    Args:
-        obj: Object to get attributes from
-        *attrs: Attribute names to traverse
-        default: Default value if attribute doesn't exist
-        
-    Returns:
-        The attribute value or default
-        
-    Examples:
-        >>> safe_get(result, 'itinerary', 'price', default=0)
-    """
-    for attr in attrs:
-        try:
-            obj = getattr(obj, attr, None)
-            if obj is None:
-                return default
-        except Exception:
-            return default
-    return obj
-
-
-def truncate_string(s: str, max_length: int = 100, suffix: str = "...") -> str:
-    """
-    Truncate a string to a maximum length.
-    
-    Args:
-        s: String to truncate
-        max_length: Maximum length including suffix
-        suffix: Suffix to append if truncated
-        
-    Returns:
-        Truncated string with suffix if needed
-    """
-    if len(s) <= max_length:
-        return s
-    return s[:max_length - len(suffix)] + suffix
-
-
 def validate_airport_code(code: str) -> str:
     """
     Validate and normalize an airport IATA code.
@@ -196,8 +153,6 @@ __all__ = [
     "extract_price",
     "format_duration",
     "format_time",
-    "safe_get",
-    "truncate_string",
     "validate_airport_code",
     "validate_date",
     "build_google_flights_url",

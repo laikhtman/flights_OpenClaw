@@ -8,7 +8,7 @@ the codebase, ensuring consistency and reducing duplication.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Literal, Protocol, runtime_checkable
+from typing import Literal, Protocol, runtime_checkable
 
 # ============================================================================
 # Type Aliases

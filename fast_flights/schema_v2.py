@@ -7,16 +7,10 @@ that are optimized for AI agent consumption.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
-from typing import List, Literal, Optional, Union
-
-from .types import SeatClass, TripType, PriceLevel
+from typing import List, Literal, Optional
 
 # Import base Flight/Result from schema.py (single source of truth)
 from .schema import Flight, Result
-
-# Re-export for backwards compatibility
-__all_base__ = ["Flight", "Result"]
 
 # Try to import Pydantic, fall back to dataclasses if not available
 try:

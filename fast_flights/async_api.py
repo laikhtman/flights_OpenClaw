@@ -33,7 +33,7 @@ from __future__ import annotations
 
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
-from typing import Any, Callable, Dict, List, Optional, TypeVar, Union
+from typing import Any, Callable, Dict, List, Optional, TypeVar
 from functools import partial
 
 # Type variable for generic async wrapper
@@ -414,12 +414,6 @@ async def search_date_range(
     }
 
 
-# Convenience aliases
-async_search = search_flights_async
-async_search_airports = search_airports_async
-async_compare_dates = compare_flight_dates_async
-
-
 __all__ = [
     # Core async functions
     "search_flights_async",
@@ -432,8 +426,4 @@ __all__ = [
     "run_in_executor",
     "get_executor",
     "shutdown_executor",
-    # Aliases
-    "async_search",
-    "async_search_airports",
-    "async_compare_dates",
 ]

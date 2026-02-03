@@ -61,7 +61,7 @@ from .utils import (
 try:
     from .agent_api import search_flights, search_airports, compare_flight_dates
     from .schema_v2 import FlightSearchRequest, FlightSearchResult, FlightSchema, PYDANTIC_AVAILABLE
-    from .errors import ErrorCode, FlightSearchError, FlightAPIException
+    from .errors import ErrorCode, FlightSearchError
     _AGENT_API_AVAILABLE = True
 except ImportError:
     _AGENT_API_AVAILABLE = False
@@ -74,7 +74,6 @@ except ImportError:
     FlightSchema = None  # type: ignore
     ErrorCode = None  # type: ignore
     FlightSearchError = None  # type: ignore
-    FlightAPIException = None  # type: ignore
     PYDANTIC_AVAILABLE = False
 
 # Configuration and reliability (always available)
@@ -145,7 +144,6 @@ __all__ = [
     "FlightSchema",
     "ErrorCode",
     "FlightSearchError",
-    "FlightAPIException",
     "PYDANTIC_AVAILABLE",
     # Configuration and reliability
     "FlightConfig",

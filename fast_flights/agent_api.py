@@ -26,7 +26,7 @@ from .schema_v2 import (
 )
 from .core import get_flights
 from .flights_impl import FlightData, Passengers
-from .errors import FlightSearchError, ErrorCode, FlightAPIException
+from .errors import FlightSearchError, ErrorCode
 from .utils import extract_price, format_duration, format_time
 
 logger = logging.getLogger(__name__)
