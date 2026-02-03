@@ -141,32 +141,29 @@ else:
 
     [:octicons-arrow-right-24: Local Setup](local.md)
 
+-   :material-api:{ .lg .middle } **HTTP API**
+
+    ---
+
+    REST API with FastAPI, Docker deployment.
+
+    [:octicons-arrow-right-24: HTTP API](http-api.md)
+
 </div>
 
 ---
 
-## Roadmap
+## ✨ Features
 
-### ✅ Phase 1: Core API (Complete)
-- Pydantic models for validation
-- Unified `search_flights()` API
-- Structured error handling
-- Comprehensive docstrings
-
-### ✅ Phase 2: MCP Server (Complete)
-- MCP server implementation
-- Tool definitions for search, airports, date comparison
-- Configuration for Claude Desktop & OpenClaw
-
-### ✅ Phase 3: Reliability (Complete)
-- Retry logic with exponential backoff
-- Thread-safe rate limiting
-- Centralized configuration management
-
-### ✅ Phase 4: Async Support (Complete)
-- Async wrapper functions
-- Concurrent multi-route searches
-- Date range search
+| Feature | Description |
+|---------|-------------|
+| 🔍 **Flight Search** | Multi-route, seat classes, stop filtering |
+| 📅 **Flexible Dates** | +/- N days, weekends, calendar heatmap |
+| 💰 **Price Tracking** | Background monitoring, alerts, history |
+| ✈️ **Airline Filtering** | Alliances, low-cost, aircraft preferences |
+| 🤖 **AI Agent Ready** | MCP server with 23 tools, structured responses |
+| 🌐 **HTTP API** | REST API with 18+ endpoints, Docker ready |
+| ⚡ **Reliability** | Retry logic, rate limiting, fallback modes |
 
 ---
 

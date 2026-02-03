@@ -12,11 +12,13 @@
 [![OpenClaw Ready](https://img.shields.io/badge/OpenClaw-Ready-orange.svg)](https://openclaw.io)
 [![PyPI](https://img.shields.io/pypi/v/fast-flights.svg)](https://pypi.org/project/fast-flights/)
 
-[**Quick Start**](#quick-start) • [**🤖 AI Agent API**](#ai-agent-integration) • [**🔧 MCP Server**](#mcp-server-claude-desktop--openclaw) • [**📚 Docs**](docs/) • [**🗺️ Roadmap**](#roadmap)
+[**Quick Start**](#quick-start) • [**🤖 AI Agent API**](#ai-agent-integration) • [**🔧 MCP Server**](#mcp-server-claude-desktop--openclaw) • [**🌐 HTTP API**](#http-api-server) • [**📚 Docs**](docs/)
 
 ```bash
 pip install fast-flights[agent]  # For AI agents
 pip install fast-flights[mcp]    # For MCP server
+pip install fast-flights[api]    # For HTTP API
+pip install fast-flights[all]    # Everything
 ```
 
 </div>
@@ -30,11 +32,12 @@ This is a fork of [AWeirdDev/flights](https://github.com/AWeirdDev/flights) — 
 **This fork adds:**
 - 🤖 **AI Agent API** - Structured JSON responses for LLM function calling
 - 🦎 **OpenClaw Ready** - Works seamlessly with OpenClaw AI agents
-- 🔧 **MCP Server** - Model Context Protocol for Claude Desktop & AI assistants
-- 📦 **Pydantic Models** - Type-safe validation & serialization  
-- 🛡️ **Error Handling** - Structured errors with recovery suggestions
-- ⚡ **Reliability** - Retry logic, rate limiting, config management
-- 📚 **Documentation** - Comprehensive guides for AI integration
+- 🔧 **MCP Server** - 23 tools for Claude Desktop & AI assistants
+- 📅 **Flexible Dates** - Search +/- N days, weekends, calendar heatmaps
+- 💰 **Price Tracking** - Monitor prices, set alerts, get notified
+- ✈️ **Airline Filtering** - Alliances, low-cost carriers, aircraft preferences
+- 🌐 **HTTP API** - REST API with FastAPI, Docker deployment
+- ⚡ **Reliability** - Retry logic, rate limiting, fallback modes
 
 ---
 
@@ -179,15 +182,14 @@ Add to Claude Desktop config (`claude_desktop_config.json`):
 }
 ```
 
-**Available MCP Tools:**
-| Tool | Description |
-|------|-------------|
-| `search_flights` | Search flights with prices, times, stops |
-| `search_airport` | Find airport codes by city name |
-| `compare_flight_dates` | Compare prices across multiple dates |
-| `track_price` | Start tracking a route for price changes |
-| `get_price_history` | Get historical prices for a route |
-| `set_price_alert` | Set alert when price drops below target |
+**Available MCP Tools (23 total):**
+
+| Category | Tools |
+|----------|-------|
+| **Flight Search** | `search_flights`, `search_airport`, `compare_flight_dates` |
+| **Flexible Dates** | `search_flexible_dates`, `search_weekend_flights`, `search_weekday_flights`, `get_calendar_heatmap`, `suggest_best_dates` |
+| **Price Tracking** | `track_price`, `get_price_history`, `set_price_alert`, `get_tracked_routes`, `get_price_alerts` |
+| **Airline Filtering** | `search_airlines`, `get_alliance_airlines`, `filter_flights_by_airline`, `get_low_cost_carriers`, `get_airline_info` |
 
 See [MCP Documentation](docs/mcp.md) for full details.
 
@@ -322,92 +324,58 @@ See [HTTP API Documentation](docs/http-api.md) for full details.
 
 ---
 
-## Roadmap
+## ✨ Features
 
-### ✅ Phase 5: Price Tracking & Alerts (Complete)
-- [x] **Price history storage**
-  - [x] SQLite backend for local storage
-  - [x] Schema for route + date + price + timestamp
-- [x] **Price monitoring**
-  - [x] Background scheduler with threading
-  - [x] Configurable check intervals
-  - [x] Price change detection
-- [x] **Alert system**
-  - [x] Webhook notifications (Discord, Slack)
-  - [x] Email alerts via SMTP
-  - [x] Price threshold triggers
-- [x] **MCP tools**
-  - [x] `track_price` - Start tracking a route
-  - [x] `get_price_history` - Retrieve historical prices
-  - [x] `set_price_alert` - Configure alert thresholds
-  - [x] `get_tracked_routes` - List tracked routes
-  - [x] `get_price_alerts` - List price alerts
+### 🔍 Flight Search
+- **Multi-route search** - One-way, round-trip, multi-city
+- **Seat class options** - Economy, premium economy, business, first
+- **Stop filtering** - Nonstop, 1-stop, 2-stop options
+- **Price levels** - Low, typical, high price indicators
 
-### 🗓️ Phase 6: Flexible Date Search ✅
-- [x] **Date range queries**
-  - [x] `+/- N days` parameter for searches
-  - [x] Weekend-only search option
-  - [x] Specific weekday filtering
-- [x] **Calendar view data**
-  - [x] Monthly price heatmap data
-  - [x] Cheapest day per week
-  - [x] Price trend indicators
-- [x] **Smart suggestions**
-  - [x] "Cheapest nearby dates" feature
-  - [x] Flexible departure + return combinations
-  - [x] Weekend/weekday preference options
-- [x] **MCP tools**
-  - [x] `search_flexible_dates` - +/- N days search
-  - [x] `search_weekend_flights` - Weekend-only flights
-  - [x] `search_weekday_flights` - Specific weekday search
-  - [x] `get_calendar_heatmap` - Monthly price heatmap
-  - [x] `suggest_best_dates` - Smart date suggestions
+### 📅 Flexible Dates
+- **Date range search** - Search +/- N days around your date
+- **Weekend flights** - Find Saturday/Sunday departures
+- **Calendar heatmap** - Monthly price overview
+- **Smart suggestions** - Cheapest dates recommendations
 
-### ✈️ Phase 7: Airline Filtering ✅
-- [x] **Airline preferences**
-  - [x] Include/exclude specific airlines
-  - [x] Alliance filtering (Star Alliance, OneWorld, SkyTeam)
-  - [x] Low-cost carrier options
-- [x] **Aircraft preferences**
-  - [x] Filter by aircraft type (wide-body only, etc.)
-  - [x] Exclude regional jets/turboprops
-- [x] **Loyalty program integration**
-  - [x] Preferred airline prioritization
-  - [x] Frequent flyer program database
-- [x] **MCP tools**
-  - [x] `search_airlines` - Find airline info
-  - [x] `get_alliance_airlines` - List alliance members
-  - [x] `filter_flights_by_airline` - Apply airline filters
-  - [x] `get_low_cost_carriers` - List budget airlines
-  - [x] `get_airline_info` - Get airline details
+### 💰 Price Tracking
+- **Background monitoring** - Track routes automatically
+- **Price history** - SQLite storage with statistics
+- **Alerts** - Webhook (Discord, Slack) and email notifications
+- **Price drops** - Get notified when prices fall below target
 
-### 🌐 Phase 8: HTTP API (FastAPI) ✅
-- [x] **REST API endpoints**
-  - [x] `POST /search` - Flight search
-  - [x] `GET /airports` - Airport lookup
-  - [x] `POST /compare` - Date comparison
-  - [x] `GET /health` - Health check
-  - [x] `POST /flexible-search` - Flexible date search
-  - [x] `GET /weekend-flights` - Weekend flight search
-  - [x] `POST /calendar-heatmap` - Monthly price calendar
-  - [x] `POST /track` - Start price tracking
-  - [x] `GET /price-history` - Historical prices
-  - [x] `POST /alerts` - Set price alerts
-  - [x] `GET /airlines/search` - Search airlines
-  - [x] `POST /filter-flights` - Filter by airline
-- [x] **API features**
-  - [x] OpenAPI/Swagger documentation
-  - [x] API key authentication
-  - [x] Rate limiting middleware
-  - [x] Request/response logging
-- [x] **Deployment**
-  - [x] Docker container
-  - [x] Docker Compose with Redis cache
-  - [ ] Kubernetes manifests
-  - [ ] Cloud Run / Railway templates
+### ✈️ Airline Filtering
+- **Alliance filtering** - Star Alliance, OneWorld, SkyTeam
+- **Include/exclude airlines** - Fine-grained control
+- **Low-cost options** - Budget carrier identification
+- **Aircraft preferences** - Wide-body only, exclude regional jets
+- **Loyalty programs** - 50+ airline frequent flyer programs
 
-### 💡 Future Ideas
+### 🤖 AI Agent Ready
+- **Structured responses** - JSON-serializable Pydantic models
+- **MCP server** - 23 tools for Claude Desktop & OpenClaw
+- **Never throws** - Errors captured in response with recovery hints
+- **Async support** - Concurrent multi-route searches
+
+### 🌐 HTTP API
+- **REST endpoints** - 18+ endpoints for all features
+- **OpenAPI docs** - Interactive Swagger UI at `/docs`
+- **Authentication** - API key support
+- **Rate limiting** - Configurable request limits
+- **Docker ready** - Dockerfile and docker-compose included
+
+### ⚡ Reliability
+- **Retry logic** - Exponential backoff with jitter
+- **Rate limiting** - Thread-safe request throttling
+- **Fallback modes** - Multiple fetch strategies
+- **Configuration** - Environment variables or code config
+
+---
+
+## 💡 Future Ideas
+
 - GraphQL API alternative
+- Kubernetes manifests & Cloud Run templates
 - Browser extension for price comparison
 - Telegram/WhatsApp bot integration
 - Machine learning price predictions
@@ -468,6 +436,7 @@ with limiter:
 
 - [AI Agent Integration Guide](docs/AI_AGENT_INTEGRATION.md)
 - [MCP Server Setup](docs/mcp.md)
+- [HTTP API Reference](docs/http-api.md)
 - [Filters & Options](docs/filters.md)
 - [Fallback Modes](docs/fallbacks.md)
 - [Airport Codes](docs/airports.md)
