@@ -67,6 +67,11 @@ except ImportError:
     FlightAPIException = None  # type: ignore
     PYDANTIC_AVAILABLE = False
 
+# Configuration and reliability (always available)
+from .config import FlightConfig, get_config, configure, reset_config
+from .retry import retry_with_backoff, RetryContext, is_retryable_error
+from .rate_limit import RateLimiter, get_rate_limiter, rate_limited
+
 __all__ = [
     # Core API
     "Airport",
@@ -91,6 +96,17 @@ __all__ = [
     "FlightSearchError",
     "FlightAPIException",
     "PYDANTIC_AVAILABLE",
+    # Configuration and reliability
+    "FlightConfig",
+    "get_config",
+    "configure",
+    "reset_config",
+    "retry_with_backoff",
+    "RetryContext",
+    "is_retryable_error",
+    "RateLimiter",
+    "get_rate_limiter",
+    "rate_limited",
 ]
 
 # Backwards-compatible name: try to resolve Cookies lazily if accessed

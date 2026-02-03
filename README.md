@@ -192,10 +192,10 @@ pip install fast-flights[all]
 - [x] Tool definitions for flight search, airport lookup, date comparison
 - [x] Configuration file for Claude Desktop / OpenClaw
 
-### 📋 Phase 3: Reliability
-- [ ] Retry logic with exponential backoff
-- [ ] Rate limiting protection
-- [ ] Centralized configuration management
+### ✅ Phase 3: Reliability (Complete)
+- [x] Retry logic with exponential backoff
+- [x] Thread-safe rate limiting
+- [x] Centralized configuration management
 
 ### 📋 Phase 4: Async Support
 - [ ] Async wrapper functions
@@ -207,6 +207,56 @@ pip install fast-flights[all]
 - Flexible date search (+/- days)
 - Airline filtering
 - HTTP API wrapper (FastAPI)
+
+---
+
+## Configuration
+
+Configure behavior via environment variables or code:
+
+```python
+from fast_flights import configure, get_config
+
+# Configure via code
+configure(
+    max_retries=3,
+    retry_base_delay=1.0,
+    rate_limit_requests=10,
+    rate_limit_window=60,
+    fetch_mode="fallback"
+)
+
+# Or via environment variables
+# FAST_FLIGHTS_MAX_RETRIES=3
+# FAST_FLIGHTS_FETCH_MODE=fallback
+# FAST_FLIGHTS_RATE_LIMIT_REQUESTS=10
+```
+
+### Retry with Backoff
+
+```python
+from fast_flights import retry_with_backoff
+
+@retry_with_backoff(max_retries=3, base_delay=1.0)
+def my_search():
+    return search_flights({"origin": "JFK", "destination": "LAX", ...})
+```
+
+### Rate Limiting
+
+```python
+from fast_flights import get_rate_limiter, rate_limited
+
+# Automatic rate limiting
+@rate_limited
+def search():
+    return search_flights(...)
+
+# Or manual control
+limiter = get_rate_limiter()
+with limiter:
+    result = search_flights(...)
+```
 
 ---
 
