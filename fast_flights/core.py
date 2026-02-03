@@ -42,10 +42,8 @@ from .filter import TFSData
 from .fallback_playwright import fallback_playwright_fetch
 from .bright_data_fetch import bright_data_fetch
 from .primp import Client, Response
+from .types import DataSource, FetchMode, SeatClass, TripType
 
-
-DataSource = Literal['html', 'js']
-"""Type alias for data source: 'html' for HTML parsing, 'js' for JavaScript data extraction."""
 
 # Default cookies embedded into the app to help bypass common consent gating.
 # These are used only if the caller does not supply cookies (binary) and

@@ -47,6 +47,16 @@ from .flights_impl import Airport, FlightData, Passengers, TFSData
 from .schema import Flight, Result
 from .search import search_airport
 
+# Type definitions and utilities (always available)
+from .types import (
+    SeatClass, TripType, FetchMode, DataSource, PriceLevel,
+    DummyResponse, SEAT_CLASSES, TRIP_TYPES, FETCH_MODES,
+)
+from .utils import (
+    extract_price, format_duration, format_time,
+    validate_airport_code, validate_date, build_google_flights_url,
+)
+
 # Agent API imports (optional - requires pydantic)
 try:
     from .agent_api import search_flights, search_airports, compare_flight_dates
@@ -109,6 +119,23 @@ __all__ = [
     "Flight",
     "search_airport",
     "Cookies",
+    # Type definitions
+    "SeatClass",
+    "TripType",
+    "FetchMode",
+    "DataSource",
+    "PriceLevel",
+    "DummyResponse",
+    "SEAT_CLASSES",
+    "TRIP_TYPES",
+    "FETCH_MODES",
+    # Utilities
+    "extract_price",
+    "format_duration",
+    "format_time",
+    "validate_airport_code",
+    "validate_date",
+    "build_google_flights_url",
     # Agent-friendly API (requires pydantic)
     "search_flights",
     "search_airports",

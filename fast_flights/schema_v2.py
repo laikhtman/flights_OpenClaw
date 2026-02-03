@@ -10,6 +10,14 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import List, Literal, Optional, Union
 
+from .types import SeatClass, TripType, PriceLevel
+
+# Import base Flight/Result from schema.py (single source of truth)
+from .schema import Flight, Result
+
+# Re-export for backwards compatibility
+__all_base__ = ["Flight", "Result"]
+
 # Try to import Pydantic, fall back to dataclasses if not available
 try:
     from pydantic import BaseModel, Field
@@ -19,31 +27,6 @@ except ImportError:
     BaseModel = object  # type: ignore
     def Field(*args, **kwargs):  # type: ignore
         return kwargs.get('default', None)
-
-
-# ============================================================================
-# Original dataclass-based models (kept for backwards compatibility)
-# ============================================================================
-
-@dataclass
-class Result:
-    """Original Result dataclass for backwards compatibility."""
-    current_price: Literal["low", "typical", "high"]
-    flights: List["Flight"]
-
-
-@dataclass
-class Flight:
-    """Original Flight dataclass for backwards compatibility."""
-    is_best: bool
-    name: str
-    departure: str
-    arrival: str
-    arrival_time_ahead: str
-    duration: str
-    stops: int
-    delay: Optional[str]
-    price: str
 
 
 # ============================================================================

@@ -2,6 +2,8 @@ from typing import Any
 import asyncio
 from playwright.async_api import async_playwright
 
+from .types import DummyResponse
+
 async def fetch_with_playwright(url: str) -> str:
     async with async_playwright() as p:
         browser = await p.chromium.launch()
@@ -20,10 +22,4 @@ async def fetch_with_playwright(url: str) -> str:
 def local_playwright_fetch(params: dict) -> Any:
     url = "https://www.google.com/travel/flights?" + "&".join(f"{k}={v}" for k, v in params.items())
     body = asyncio.run(fetch_with_playwright(url))
-
-    class DummyResponse:
-        status_code = 200
-        text = body
-        text_markdown = body
-
-    return DummyResponse
+    return DummyResponse(status_code=200, text=body)

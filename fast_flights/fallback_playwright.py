@@ -1,6 +1,7 @@
 from typing import Any
 
 from .primp import Client
+from .types import DummyResponse
 
 CODE = """\
 import asyncio
@@ -44,9 +45,5 @@ def fallback_playwright_fetch(params: dict) -> Any:
     assert res.status_code == 200, f"{res.status_code} Result: {res.text_markdown}"
     import json
 
-    class DummyResponse:
-        status_code = 200
-        text = json.loads(res.text)["output"]
-        text_markdown = text
-
-    return DummyResponse
+    output = json.loads(res.text)["output"]
+    return DummyResponse(status_code=200, text=output)

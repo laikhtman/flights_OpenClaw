@@ -27,8 +27,145 @@ from .schema_v2 import (
 from .core import get_flights
 from .flights_impl import FlightData, Passengers
 from .errors import FlightSearchError, ErrorCode, FlightAPIException
+from .utils import extract_price, format_duration, format_time
 
 logger = logging.getLogger(__name__)
+
+
+# ============================================================================
+# Helper Functions (extracted for testability and clarity)
+# ============================================================================
+
+def _validate_request(request: Union["FlightSearchRequest", dict]) -> "FlightSearchRequest":
+    """
+    Validate and normalize the search request.
+    
+    Args:
+        request: Either a FlightSearchRequest or dict
+        
+    Returns:
+        Validated FlightSearchRequest
+        
+    Raises:
+        ValueError: If validation fails
+    """
+    if isinstance(request, dict):
+        request = FlightSearchRequest(**request)
+    request.validate_passengers()
+    return request
+
+
+def _build_flight_data(request: "FlightSearchRequest") -> List[FlightData]:
+    """Build FlightData list from request."""
+    flight_data = [
+        FlightData(
+            date=request.departure_date,
+            from_airport=request.origin.upper(),
+            to_airport=request.destination.upper()
+        )
+    ]
+    
+    if request.return_date:
+        flight_data.append(
+            FlightData(
+                date=request.return_date,
+                from_airport=request.destination.upper(),
+                to_airport=request.origin.upper()
+            )
+        )
+    
+    return flight_data
+
+
+def _build_passengers(request: "FlightSearchRequest") -> Passengers:
+    """Build Passengers object from request."""
+    return Passengers(
+        adults=request.adults,
+        children=request.children,
+        infants_in_seat=request.infants_in_seat,
+        infants_on_lap=request.infants_on_lap
+    )
+
+
+def _generate_search_url(
+    flight_data: List[FlightData],
+    request: "FlightSearchRequest",
+    passengers: Passengers
+) -> Optional[str]:
+    """Generate Google Flights search URL."""
+    try:
+        from .filter import create_filter
+        from .utils import build_google_flights_url
+        
+        tfs = create_filter(
+            flight_data=flight_data,
+            trip=request.trip_type,
+            passengers=passengers,
+            seat=request.seat_class,
+            max_stops=request.max_stops
+        )
+        b64 = tfs.as_b64().decode('utf-8')
+        return build_google_flights_url(b64)
+    except Exception:
+        return None
+
+
+def _convert_result_flights(result) -> "tuple[List[FlightSchema], str]":
+    """
+    Convert search result to FlightSchema list.
+    
+    Returns:
+        Tuple of (flights list, current_price)
+    """
+    if hasattr(result, 'flights'):
+        # Standard Result object
+        flights = [
+            FlightSchema(
+                is_best=f.is_best,
+                name=f.name,
+                departure=f.departure,
+                arrival=f.arrival,
+                arrival_time_ahead=getattr(f, 'arrival_time_ahead', ''),
+                duration=f.duration,
+                stops=f.stops if isinstance(f.stops, int) else 0,
+                delay=getattr(f, 'delay', None),
+                price=f.price
+            )
+            for f in result.flights
+        ]
+        current_price = getattr(result, 'current_price', 'unknown') or 'unknown'
+        return flights, current_price
+    
+    elif hasattr(result, 'best') and hasattr(result, 'other'):
+        # DecodedResult object (from js data source)
+        flights = []
+        for i, itinerary in enumerate(result.best + result.other):
+            is_best = i < len(result.best)
+            airline_names = getattr(itinerary, 'airline_names', [])
+            name = ', '.join(airline_names) if airline_names else 'Unknown'
+            
+            dep_time = getattr(itinerary, 'departure_time', (0, 0))
+            arr_time = getattr(itinerary, 'arrival_time', (0, 0))
+            
+            flights.append(FlightSchema(
+                is_best=is_best,
+                name=name,
+                departure=format_time(*dep_time) if dep_time else "",
+                arrival=format_time(*arr_time) if arr_time else "",
+                arrival_time_ahead="",
+                duration=format_duration(itinerary.travel_time) if hasattr(itinerary, 'travel_time') else "",
+                stops=len(getattr(itinerary, 'layovers', [])),
+                delay=None,
+                price=f"${itinerary.itinerary_summary.price}" if hasattr(itinerary, 'itinerary_summary') else "N/A"
+            ))
+        return flights, "unknown"
+    
+    return [], "unknown"
+
+
+# ============================================================================
+# Main API Functions
+# ============================================================================
 
 
 def search_flights(
@@ -97,14 +234,9 @@ def search_flights(
             error="Pydantic is required for agent API. Install with: pip install pydantic"
         )
     
-    # Convert dict to Pydantic model if needed
+    # Validate and normalize request
     try:
-        if isinstance(request, dict):
-            request = FlightSearchRequest(**request)
-        
-        # Validate passenger configuration
-        request.validate_passengers()
-        
+        request = _validate_request(request)
     except Exception as e:
         logger.warning(f"Invalid request parameters: {e}")
         return FlightSearchResult(
@@ -113,49 +245,10 @@ def search_flights(
             error=f"Invalid request parameters: {str(e)}"
         )
     
-    # Build flight data list
-    flight_data = [
-        FlightData(
-            date=request.departure_date,
-            from_airport=request.origin.upper(),
-            to_airport=request.destination.upper()
-        )
-    ]
-    
-    # Add return flight for round-trip
-    if request.return_date:
-        flight_data.append(
-            FlightData(
-                date=request.return_date,
-                from_airport=request.destination.upper(),
-                to_airport=request.origin.upper()
-            )
-        )
-    
-    # Build passengers object
-    passengers = Passengers(
-        adults=request.adults,
-        children=request.children,
-        infants_in_seat=request.infants_in_seat,
-        infants_on_lap=request.infants_on_lap
-    )
-    
-    # Generate search URL if requested
-    search_url = None
-    if include_url:
-        try:
-            from .filter import create_filter
-            tfs = create_filter(
-                flight_data=flight_data,
-                trip=request.trip_type,
-                passengers=passengers,
-                seat=request.seat_class,
-                max_stops=request.max_stops
-            )
-            b64 = tfs.as_b64().decode('utf-8')
-            search_url = f"https://www.google.com/travel/flights?tfs={b64}"
-        except Exception:
-            pass  # URL generation is non-critical
+    # Build search components
+    flight_data = _build_flight_data(request)
+    passengers = _build_passengers(request)
+    search_url = _generate_search_url(flight_data, request, passengers) if include_url else None
     
     # Execute the search
     try:
@@ -176,49 +269,10 @@ def search_flights(
                 error="No flights found for the specified route and dates"
             )
         
-        # Handle both Result and DecodedResult types
-        if hasattr(result, 'flights'):
-            # Standard Result object
-            flights = [
-                FlightSchema(
-                    is_best=f.is_best,
-                    name=f.name,
-                    departure=f.departure,
-                    arrival=f.arrival,
-                    arrival_time_ahead=getattr(f, 'arrival_time_ahead', ''),
-                    duration=f.duration,
-                    stops=f.stops if isinstance(f.stops, int) else 0,
-                    delay=getattr(f, 'delay', None),
-                    price=f.price
-                )
-                for f in result.flights
-            ]
-            current_price = getattr(result, 'current_price', 'unknown') or 'unknown'
-        elif hasattr(result, 'best') and hasattr(result, 'other'):
-            # DecodedResult object (from js data source)
-            flights = []
-            for i, itinerary in enumerate(result.best + result.other):
-                is_best = i < len(result.best)
-                # Extract flight info from itinerary
-                airline_names = getattr(itinerary, 'airline_names', [])
-                name = ', '.join(airline_names) if airline_names else 'Unknown'
-                
-                dep_time = getattr(itinerary, 'departure_time', (0, 0))
-                arr_time = getattr(itinerary, 'arrival_time', (0, 0))
-                
-                flights.append(FlightSchema(
-                    is_best=is_best,
-                    name=name,
-                    departure=f"{dep_time[0]:02d}:{dep_time[1]:02d}" if dep_time else "",
-                    arrival=f"{arr_time[0]:02d}:{arr_time[1]:02d}" if arr_time else "",
-                    arrival_time_ahead="",
-                    duration=f"{itinerary.travel_time // 60}h {itinerary.travel_time % 60}m" if hasattr(itinerary, 'travel_time') else "",
-                    stops=len(getattr(itinerary, 'layovers', [])),
-                    delay=None,
-                    price=f"${itinerary.itinerary_summary.price}" if hasattr(itinerary, 'itinerary_summary') else "N/A"
-                ))
-            current_price = "unknown"
-        else:
+        # Convert result to schema
+        flights, current_price = _convert_result_flights(result)
+        
+        if not flights and not hasattr(result, 'flights') and not hasattr(result, 'best'):
             return FlightSearchResult(
                 success=False,
                 current_price="unknown",
@@ -340,12 +394,8 @@ def compare_flight_dates(
         })
         
         if search_result.success and search_result.flights:
-            # Find cheapest flight
-            def parse_price(price_str: str) -> float:
-                match = re.search(r'[\d,]+\.?\d*', price_str.replace(',', ''))
-                return float(match.group()) if match else float('inf')
-            
-            cheapest = min(search_result.flights, key=lambda f: parse_price(f.price))
+            # Find cheapest flight using shared extract_price
+            cheapest = min(search_result.flights, key=lambda f: extract_price(f.price))
             results.append({
                 "date": date,
                 "cheapest_price": cheapest.price,
@@ -364,12 +414,7 @@ def compare_flight_dates(
     # Generate recommendation
     valid_results = [r for r in results if "cheapest_price" in r]
     if valid_results:
-        def parse_price(price_str: str) -> float:
-            import re
-            match = re.search(r'[\d,]+\.?\d*', price_str.replace(',', ''))
-            return float(match.group()) if match else float('inf')
-        
-        cheapest_day = min(valid_results, key=lambda r: parse_price(r["cheapest_price"]))
+        cheapest_day = min(valid_results, key=lambda r: extract_price(r["cheapest_price"]))
         recommendation = f"Best date to fly: {cheapest_day['date']} at {cheapest_day['cheapest_price']}"
     else:
         recommendation = "Unable to compare - no valid results found"
