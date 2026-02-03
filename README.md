@@ -225,32 +225,72 @@ pip install fast-flights[all]
 
 ## Roadmap
 
-### ✅ Phase 1: Core API Improvements (Complete)
-- [x] Pydantic models for schema validation
-- [x] Unified `search_flights()` function for agents
-- [x] Structured error handling with recovery suggestions
-- [x] Comprehensive docstrings and type hints
+### 🎯 Phase 5: Price Tracking & Alerts
+- [ ] **Price history storage**
+  - [ ] SQLite backend for local storage
+  - [ ] Optional Redis/PostgreSQL for production
+  - [ ] Schema for route + date + price + timestamp
+- [ ] **Price monitoring**
+  - [ ] Background scheduler (APScheduler)
+  - [ ] Configurable check intervals
+  - [ ] Price change detection algorithms
+- [ ] **Alert system**
+  - [ ] Webhook notifications (Discord, Slack)
+  - [ ] Email alerts via SMTP
+  - [ ] Price threshold triggers (e.g., "alert when < $300")
+- [ ] **MCP tools**
+  - [ ] `track_price` - Start tracking a route
+  - [ ] `get_price_history` - Retrieve historical prices
+  - [ ] `set_price_alert` - Configure alert thresholds
 
-### ✅ Phase 2: MCP Server (Complete)
-- [x] MCP server implementation (`fast_flights.mcp_server`)
-- [x] Tool definitions for flight search, airport lookup, date comparison
-- [x] Configuration file for Claude Desktop / OpenClaw
+### 🗓️ Phase 6: Flexible Date Search
+- [ ] **Date range queries**
+  - [ ] `+/- N days` parameter for searches
+  - [ ] Weekend-only search option
+  - [ ] Specific weekday filtering
+- [ ] **Calendar view data**
+  - [ ] Monthly price heatmap data
+  - [ ] Cheapest day per week
+  - [ ] Price trend indicators
+- [ ] **Smart suggestions**
+  - [ ] "Cheapest nearby dates" feature
+  - [ ] Flexible departure + return combinations
+  - [ ] Holiday/peak season awareness
 
-### ✅ Phase 3: Reliability (Complete)
-- [x] Retry logic with exponential backoff
-- [x] Thread-safe rate limiting
-- [x] Centralized configuration management
+### ✈️ Phase 7: Airline Filtering
+- [ ] **Airline preferences**
+  - [ ] Include/exclude specific airlines
+  - [ ] Alliance filtering (Star Alliance, OneWorld, SkyTeam)
+  - [ ] Codeshare handling options
+- [ ] **Aircraft preferences**
+  - [ ] Filter by aircraft type (wide-body only, etc.)
+  - [ ] Avoid specific aircraft models
+- [ ] **Loyalty program integration**
+  - [ ] Preferred airline prioritization
+  - [ ] Miles earning potential display
 
-### ✅ Phase 4: Async Support (Complete)
-- [x] Async wrapper functions
-- [x] Concurrent multi-route searches
-- [x] Date range search
+### 🌐 Phase 8: HTTP API (FastAPI)
+- [ ] **REST API endpoints**
+  - [ ] `POST /search` - Flight search
+  - [ ] `GET /airports` - Airport lookup
+  - [ ] `POST /compare` - Date comparison
+  - [ ] `GET /health` - Health check
+- [ ] **API features**
+  - [ ] OpenAPI/Swagger documentation
+  - [ ] API key authentication
+  - [ ] Rate limiting middleware
+  - [ ] Request/response logging
+- [ ] **Deployment**
+  - [ ] Docker container
+  - [ ] Docker Compose with Redis cache
+  - [ ] Kubernetes manifests
+  - [ ] Cloud Run / Railway templates
 
 ### 💡 Future Ideas
-- Price tracking & alerts
-- Flexible date search (+/- days)
-- Airline filtering
-- HTTP API wrapper (FastAPI)
+- GraphQL API alternative
+- Browser extension for price comparison
+- Telegram/WhatsApp bot integration
+- Machine learning price predictions
 
 ---
 
